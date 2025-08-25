@@ -28,19 +28,14 @@ The goal is to help hospitals maintain **optimized medicine inventories** with m
   - Summary stats for quick insights
 
 ---
----
-## 🗂️ Monorepo Structure
 med-ai-inventory/
 │
 ├── apps/
-│ ├── frontend/ # Next.js app for UI
-│ └── backend/ # Express API + MongoDB + LangChain.js
+│   ├── frontend/        # Next.js app for UI
+│   └── backend/         # Express API + MongoDB + LangChain.js
 │
 └── packages/
-└── shared-types/ # Shared TypeScript/JS models & utils
----
-
-
+    └── shared-types/    # Shared TypeScript/JS models & utils
 ---
 
 ## 🔄 Workflow
