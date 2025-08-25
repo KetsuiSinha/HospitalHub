@@ -26,16 +26,6 @@ The goal is to help hospitals maintain **optimized medicine inventories** with m
   - Clean UI with shadcn components
   - Charts for demand trends
   - Summary stats for quick insights
-
----
-med-ai-inventory/
-│
-├── apps/
-│   ├── frontend/        # Next.js app for UI
-│   └── backend/         # Express API + MongoDB + LangChain.js
-│
-└── packages/
-    └── shared-types/    # Shared TypeScript/JS models & utils
 ---
 
 ## 🔄 Workflow
