@@ -39,6 +39,3 @@ The goal is to help hospitals maintain **optimized medicine inventories** with m
 5. **Admin applies changes** → Inventory updates instantly.
 
 ---
-
-
-## 🗂️ Monorepo Structure
