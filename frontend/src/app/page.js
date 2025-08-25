@@ -12,6 +12,7 @@ import { InventoryPage } from "@/components/inventory/InventoryPage";
 import { AlertPage } from "@/components/AlertPage";
 import { StaffPage } from "@/components/inventory/StaffPage";
 import { use } from "react";
+import { ca } from 'zod/v4/locales/index.cjs';
 
 export default function App({ Component, pageProps }) {
   const [currentPage, setCurrentPage] = useState("landing");
