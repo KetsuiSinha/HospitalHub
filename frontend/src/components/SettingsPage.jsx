@@ -5,12 +5,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { User, Mail, LogOut } from 'lucide-react';
 import '@/app/globals.css'; // import global theme
+import { getAuthUser } from '@/lib/api';
 
 export function SettingsPage({ onNavigate, onLogout }) {
-  const [user] = useState({
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-  });
+  const [user, setUser] = useState(() => getAuthUser() || { name: '—', email: '—' });
 
 // inside SettingsPage.jsx
 const [theme, setTheme] = useState(() => {
@@ -28,6 +26,11 @@ useEffect(() => {
   // persist theme
   localStorage.setItem('app-theme', theme);
 }, [theme]);
+
+useEffect(() => {
+  const u = getAuthUser();
+  if (u) setUser(u);
+}, []);
 
   return (
     <ToggleableSidebar currentPage="settings" onNavigate={onNavigate} onLogout={onLogout}>

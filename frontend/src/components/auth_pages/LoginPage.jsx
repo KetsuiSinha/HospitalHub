@@ -2,14 +2,28 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { authApi, saveAuth } from '@/lib/api';
 
 export function LoginPage({ onNavigate, onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin();
+    setError('');
+    setLoading(true);
+    try {
+      const res = await authApi.signin({ email, password });
+      saveAuth(res.token, res.user);
+      onLogin();
+    } catch (err) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -36,6 +50,11 @@ export function LoginPage({ onNavigate, onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <div className="text-sm" style={{ color: 'var(--destructive)' }}>
+              {error}
+            </div>
+          )}
           <div>
             <Label htmlFor="email" style={{ color: 'var(--foreground)' }}>Email</Label>
             <Input
@@ -80,8 +99,9 @@ export function LoginPage({ onNavigate, onLogin }) {
               color: 'var(--primary-foreground)',
               borderRadius: 'var(--radius)',
             }}
+            disabled={loading}
           >
-            Sign in
+            {loading ? 'Signing in...' : 'Sign in'}
           </Button>
         </form>
 

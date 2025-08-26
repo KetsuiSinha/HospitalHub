@@ -3,15 +3,35 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock } from "lucide-react";
+import { authApi } from "@/lib/api";
 
 export function SignupPage({ onNavigate, onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const handleSubmit = (e) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onLogin();
+    setError("");
+    setSuccess("");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    try {
+      setLoading(true);
+      await authApi.signup({ name: email.split('@')[0], email, password, role: 'staff' });
+      setSuccess("Account created. Please sign in.");
+      onNavigate("login");
+    } catch (err) {
+      setError(err.message || "Signup failed");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -33,6 +53,12 @@ export function SignupPage({ onNavigate, onLogin }) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="text-sm" style={{ color: "var(--destructive)" }}>{error}</div>
+          )}
+          {success && (
+            <div className="text-sm" style={{ color: "var(--success)" }}>{success}</div>
+          )}
           {[
             { id: "email", type: "email", label: "Email", placeholder: "Enter your email", icon: Mail },
             { id: "password", type: "password", label: "Password", placeholder: "Create a password", icon: Lock },
@@ -75,8 +101,9 @@ export function SignupPage({ onNavigate, onLogin }) {
             type="submit"
             className="w-full"
             style={{ backgroundColor: "var(--primary)", color: "var(--primary-foreground)" }}
+            disabled={loading}
           >
-            Sign up
+            {loading ? "Creating account..." : "Sign up"}
           </Button>
         </form>
 

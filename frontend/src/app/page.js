@@ -1,7 +1,7 @@
 // s/_app.js
 'use client';   // needed because you're using React state/hooks in Next.js app router
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 
 import { LandingPage } from "@/components/LandingPage";
@@ -12,25 +12,47 @@ import { InventoryPage } from "@/components/inventory/InventoryPage";
 import { AlertPage } from "@/components/AlertPage";
 import { StaffPage } from "@/components/inventory/StaffPage";
 import { SettingsPage } from '@/components/SettingsPage';
-import { use } from "react";
-import { ca } from 'zod/v4/locales/index.cjs';
+import { getAuthUser, clearAuth } from "@/lib/api";
 
 export default function App({ Component, pageProps }) {
   const [currentPage, setCurrentPage] = useState("landing");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  useEffect(() => {
+    const user = getAuthUser();
+    const savedPage = typeof window !== 'undefined' ? localStorage.getItem('current_page') : null;
+    if (user) {
+      setIsAuthenticated(true);
+      if (savedPage) setCurrentPage(savedPage);
+    } else {
+      // If not authenticated, only allow public pages on refresh
+      const publicPages = new Set(["landing", "login", "signup"]);
+      setCurrentPage(publicPages.has(savedPage || "") ? savedPage : "landing");
+    }
+  }, []);
+
   const navigate = (page) => {
     setCurrentPage(page);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('current_page', page);
+    }
   };
 
   const handleLogin = () => {
     setIsAuthenticated(true);
     setCurrentPage("dashboard");
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('current_page', 'dashboard');
+    }
   };
 
   const handleLogout = () => {
+    clearAuth();
     setIsAuthenticated(false);
     setCurrentPage("landing");
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('current_page');
+    }
   };
 
   const renderPage = () => {

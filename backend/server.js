@@ -1,5 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const cors = require("cors");
 const connectDB = require("./src/config/db");
 const authMiddleware = require("./src/middleware/authMiddleware");
 
@@ -7,6 +8,13 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
+// CORS
+app.use(
+  cors({
+    origin: process.env.CLIENT_ORIGIN || "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 // DB Connection
 connectDB();
