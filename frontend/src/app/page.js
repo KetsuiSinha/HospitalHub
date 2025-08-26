@@ -11,6 +11,7 @@ import {Dashboard} from "@/components/Dashboard";
 import { InventoryPage } from "@/components/inventory/InventoryPage";
 import { AlertPage } from "@/components/AlertPage";
 import { StaffPage } from "@/components/inventory/StaffPage";
+import { SettingsPage } from '@/components/SettingsPage';
 import { use } from "react";
 import { ca } from 'zod/v4/locales/index.cjs';
 
@@ -48,6 +49,8 @@ export default function App({ Component, pageProps }) {
         return <AlertPage onNavigate={navigate} onLogout={handleLogout} />;
       case "staff":
         return <StaffPage onNavigate={navigate} onLogout={handleLogout} />;
+        case "settings":
+        return <SettingsPage onNavigate={navigate} onLogout={handleLogout} />;
       default:
         return <LandingPage onNavigate={navigate} />;
     }

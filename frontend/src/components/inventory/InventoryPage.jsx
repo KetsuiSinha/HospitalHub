@@ -59,65 +59,49 @@ export function InventoryPage({ onNavigate, onLogout }) {
     setMedicines(medicines.filter(med => med.id !== id));
   };
 
+  const getStockColor = (stock) => {
+    if (stock < 50) return { backgroundColor: 'var(--destructive)', color: 'var(--destructive-foreground)' };
+    if (stock < 100) return { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)' };
+    return { backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' };
+  };
+
   return (
-    <ToggleableSidebar 
-      currentPage="inventory" 
-      onNavigate={onNavigate} 
-      onLogout={onLogout}
-    >
-      <div className="p-6 space-y-6">
+    <ToggleableSidebar currentPage="inventory" onNavigate={onNavigate} onLogout={onLogout}>
+      <div className="p-6 space-y-6" style={{ color: 'var(--foreground)' }}>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">Inventory</h1>
+          <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Inventory</h1>
+
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-blue-700 hover:bg-blue-800">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Medicine
+              <Button style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
+                <Plus className="w-4 h-4 mr-2" /> Add Medicine
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
+            <DialogContent className="sm:max-w-md" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
               <DialogHeader>
                 <DialogTitle>Add New Medicine</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">Medicine Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="Enter medicine name"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="stock">Stock Quantity</Label>
-                  <Input
-                    id="stock"
-                    type="number"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                    placeholder="Enter stock quantity"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="expiry">Expiry Date</Label>
-                  <Input
-                    id="expiry"
-                    value={formData.expiry}
-                    onChange={(e) => setFormData({ ...formData, expiry: e.target.value })}
-                    placeholder="MM/YYYY"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="batch">Batch Number</Label>
-                  <Input
-                    id="batch"
-                    value={formData.batch}
-                    onChange={(e) => setFormData({ ...formData, batch: e.target.value })}
-                    placeholder="Enter batch number"
-                  />
-                </div>
-                <Button onClick={handleAddMedicine} className="w-full bg-blue-700 hover:bg-blue-800">
+                {['name', 'stock', 'expiry', 'batch'].map((field) => (
+                  <div key={field}>
+                    <Label htmlFor={field} style={{ color: 'var(--foreground)' }}>
+                      {field === 'name' ? 'Medicine Name' : field === 'stock' ? 'Stock Quantity' : field === 'expiry' ? 'Expiry Date' : 'Batch Number'}
+                    </Label>
+                    <Input
+                      id={field}
+                      type={field === 'stock' ? 'number' : 'text'}
+                      value={formData[field]}
+                      onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                      placeholder={`Enter ${field}`}
+                      style={{
+                        backgroundColor: 'var(--input)',
+                        color: 'var(--foreground)',
+                        borderColor: 'var(--border)',
+                      }}
+                    />
+                  </div>
+                ))}
+                <Button onClick={handleAddMedicine} style={{ width: '100%', backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
                   Add Medicine
                 </Button>
               </div>
@@ -125,11 +109,11 @@ export function InventoryPage({ onNavigate, onLogout }) {
           </Dialog>
         </div>
 
-        <Card className="p-6">
+        <Card style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)', boxShadow: 'var(--shadow-md)' }}>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200">
+                <tr style={{ borderBottom: '1px solid var(--border)' }}>
                   <th className="text-left py-3 px-4">Medicine</th>
                   <th className="text-left py-3 px-4">Stock</th>
                   <th className="text-left py-3 px-4">Expiry</th>
@@ -139,26 +123,30 @@ export function InventoryPage({ onNavigate, onLogout }) {
               </thead>
               <tbody>
                 {medicines.map((medicine) => (
-                  <tr key={medicine.id} className="border-b border-gray-100">
-                    <td className="py-3 px-4 font-medium text-gray-900">{medicine.name}</td>
+                  <tr key={medicine.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                    <td className="py-3 px-4" style={{ color: 'var(--foreground)', fontWeight: 500 }}>{medicine.name}</td>
                     <td className="py-3 px-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        medicine.stock < 50 ? 'bg-red-100 text-red-800' :
-                        medicine.stock < 100 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-green-100 text-green-800'
-                      }`}>
+                      <span style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        padding: '0.25rem 0.5rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        ...getStockColor(medicine.stock)
+                      }}>
                         {medicine.stock} units
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-700">{medicine.expiry}</td>
-                    <td className="py-3 px-4 text-gray-700 font-mono text-sm">{medicine.batch}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--muted-foreground)' }}>{medicine.expiry}</td>
+                    <td className="py-3 px-4" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>{medicine.batch}</td>
                     <td className="py-3 px-4">
                       <div className="flex space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleEditMedicine(medicine)}
-                          className="hover:bg-blue-50 hover:text-blue-700"
+                          style={{ borderColor: 'var(--primary)', color: 'var(--primary-foreground)' }}
                         >
                           <Edit className="w-4 h-4" />
                         </Button>
@@ -166,7 +154,7 @@ export function InventoryPage({ onNavigate, onLogout }) {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDeleteMedicine(medicine.id)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          style={{ borderColor: 'var(--destructive)', color: 'var(--destructive-foreground)' }}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -179,68 +167,52 @@ export function InventoryPage({ onNavigate, onLogout }) {
           </div>
 
           {medicines.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              <Package className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <div className="text-center py-8" style={{ color: 'var(--muted-foreground)' }}>
+              <Package className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--muted)' }} />
               <p>No medicines in inventory</p>
               <p className="text-sm">Click "Add Medicine" to get started</p>
             </div>
           )}
         </Card>
 
-        <Dialog open={!!editingMedicine} onOpenChange={(open) => !open && setEditingMedicine(null)}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Edit Medicine</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="edit-name">Medicine Name</Label>
-                <Input
-                  id="edit-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="Enter medicine name"
-                />
+        {editingMedicine && (
+          <Dialog open={!!editingMedicine} onOpenChange={(open) => !open && setEditingMedicine(null)}>
+            <DialogContent className="sm:max-w-md" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
+              <DialogHeader>
+                <DialogTitle>Edit Medicine</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                {['name', 'stock', 'expiry', 'batch'].map((field) => (
+                  <div key={field}>
+                    <Label htmlFor={`edit-${field}`} style={{ color: 'var(--foreground)' }}>
+                      {field === 'name' ? 'Medicine Name' : field === 'stock' ? 'Stock Quantity' : field === 'expiry' ? 'Expiry Date' : 'Batch Number'}
+                    </Label>
+                    <Input
+                      id={`edit-${field}`}
+                      type={field === 'stock' ? 'number' : 'text'}
+                      value={formData[field]}
+                      onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
+                      placeholder={`Enter ${field}`}
+                      style={{
+                        backgroundColor: 'var(--input)',
+                        color: 'var(--foreground)',
+                        borderColor: 'var(--border)',
+                      }}
+                    />
+                  </div>
+                ))}
+                <div className="flex space-x-2 pt-4">
+                  <Button style={{ flex: 1, backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }} onClick={handleUpdateMedicine}>
+                    Update Medicine
+                  </Button>
+                  <Button variant="outline" style={{ flex: 1, borderColor: 'var(--border)', color: 'var(--foreground)' }} onClick={() => setEditingMedicine(null)}>
+                    Cancel
+                  </Button>
+                </div>
               </div>
-              <div>
-                <Label htmlFor="edit-stock">Stock Quantity</Label>
-                <Input
-                  id="edit-stock"
-                  type="number"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  placeholder="Enter stock quantity"
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-expiry">Expiry Date</Label>
-                <Input
-                  id="edit-expiry"
-                  value={formData.expiry}
-                  onChange={(e) => setFormData({ ...formData, expiry: e.target.value })}
-                  placeholder="MM/YYYY"
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-batch">Batch Number</Label>
-                <Input
-                  id="edit-batch"
-                  value={formData.batch}
-                  onChange={(e) => setFormData({ ...formData, batch: e.target.value })}
-                  placeholder="Enter batch number"
-                />
-              </div>
-              <div className="flex space-x-2 pt-4">
-                <Button className="flex-1 bg-blue-700 hover:bg-blue-800" onClick={handleUpdateMedicine}>
-                  Update Medicine
-                </Button>
-                <Button variant="outline" className="flex-1" onClick={() => setEditingMedicine(null)}>
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
       </div>
     </ToggleableSidebar>
   );

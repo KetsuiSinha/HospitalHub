@@ -15,77 +15,76 @@ export function SignupPage({ onNavigate, onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
-      <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-200 w-full max-w-md">
+    <div
+      className="min-h-screen flex items-center justify-center p-6"
+      style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
+    >
+      <div
+        className="p-8 rounded-2xl shadow-lg border w-full max-w-md"
+        style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
+      >
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Create Account</h1>
-          <p className="text-gray-600 text-sm mt-2">
+          <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>
+            Create Account
+          </h1>
+          <p style={{ color: "var(--muted-foreground)", fontSize: "0.875rem", marginTop: "0.5rem" }}>
             Join Hospibot to manage your healthcare facility
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          <div>
-            <Label htmlFor="email">Email</Label>
-            <div className="relative mt-1">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="pl-10"
-                placeholder="Enter your email"
-                required
-              />
+          {[
+            { id: "email", type: "email", label: "Email", placeholder: "Enter your email", icon: Mail },
+            { id: "password", type: "password", label: "Password", placeholder: "Create a password", icon: Lock },
+            { id: "confirmPassword", type: "password", label: "Confirm Password", placeholder: "Confirm your password", icon: Lock },
+          ].map(({ id, type, label, placeholder, icon: Icon }) => (
+            <div key={id}>
+              <Label htmlFor={id} style={{ color: "var(--foreground)" }}>{label}</Label>
+              <div className="relative mt-1">
+                <Icon
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                  style={{ color: "var(--muted-foreground)" }}
+                />
+                <Input
+                  id={id}
+                  type={type}
+                  value={
+                    id === "email" ? email : id === "password" ? password : confirmPassword
+                  }
+                  onChange={(e) =>
+                    id === "email"
+                      ? setEmail(e.target.value)
+                      : id === "password"
+                      ? setPassword(e.target.value)
+                      : setConfirmPassword(e.target.value)
+                  }
+                  className="pl-10"
+                  placeholder={placeholder}
+                  required
+                  style={{
+                    backgroundColor: "var(--input)",
+                    color: "var(--foreground)",
+                    borderColor: "var(--border)",
+                  }}
+                />
+              </div>
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="password">Password</Label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="pl-10"
-                placeholder="Create a password"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
-            <div className="relative mt-1">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10"
-                placeholder="Confirm your password"
-                required
-              />
-            </div>
-          </div>
+          ))}
 
           <Button
             type="submit"
-            className="w-full bg-blue-700 hover:bg-blue-800 text-white"
+            className="w-full"
+            style={{ backgroundColor: "var(--primary)", color: "var(--primary-foreground)" }}
           >
             Sign up
           </Button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-6 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
           Already have an account?{" "}
           <button
             onClick={() => onNavigate("login")}
-            className="text-blue-700 font-medium hover:underline"
+            style={{ color: "var(--primary)", fontWeight: 500, textDecoration: "underline" }}
           >
             Sign in
           </button>
