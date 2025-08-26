@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sidebar } from '@/components/Sidebar';
+import { ToggleableSidebar } from '@/components/Sidebar';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 
@@ -31,14 +31,23 @@ export function Dashboard({ onNavigate, onLogout }) {
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar currentPage="dashboard" onNavigate={onNavigate} onLogout={onLogout} />
-      
-      <div className="flex-1 p-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Dashboard</h1>
-        
+    <ToggleableSidebar 
+      currentPage="dashboard" 
+      onNavigate={onNavigate} 
+      onLogout={onLogout}
+    >
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p className="text-gray-600 mt-1">
+              Overview of inventory, alerts, staff attendance, and AI recommendations
+            </p>
+          </div>
+        </div>
+
         {/* Top Row */}
-        <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <div className="grid lg:grid-cols-2 gap-6">
           {/* Inventory Overview */}
           <Card className="p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4">Inventory Overview</h2>
@@ -79,14 +88,17 @@ export function Dashboard({ onNavigate, onLogout }) {
             <h2 className="text-lg font-bold text-gray-900 mb-4">Staff Attendance</h2>
             <div className="flex items-center justify-center mb-4">
               <div className="relative w-32 h-32">
+                {/* Background circle */}
                 <div className="absolute inset-0 bg-gray-200 rounded-full"></div>
+                {/* Progress circle */}
                 <div 
-                  className="absolute inset-0 bg-blue-600 rounded-full"
+                  className="absolute inset-0 rounded-full"
                   style={{
-                    clipPath: `polygon(50% 50%, 50% 0%, ${50 + (staffStats.present / staffStats.total) * 50}% 0%, 100% 100%, 0% 100%)`
+                    background: `conic-gradient(#2563eb 0deg ${(staffStats.present / staffStats.total) * 360}deg, transparent ${(staffStats.present / staffStats.total) * 360}deg 360deg)`
                   }}
                 ></div>
-                <div className="absolute inset-0 flex items-center justify-center">
+                {/* Inner circle */}
+                <div className="absolute inset-4 bg-white rounded-full flex items-center justify-center">
                   <div className="text-center">
                     <div className="text-2xl font-bold text-gray-900">{staffStats.present}</div>
                     <div className="text-sm text-gray-600">of {staffStats.total}</div>
@@ -120,6 +132,6 @@ export function Dashboard({ onNavigate, onLogout }) {
           </Card>
         </div>
       </div>
-    </div>
+    </ToggleableSidebar>
   );
 }

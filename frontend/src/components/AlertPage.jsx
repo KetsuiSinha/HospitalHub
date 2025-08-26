@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Sidebar } from './Sidebar';
-import { Button } from './ui/button';
-import { Card } from './ui/card';
-import { Badge } from './ui/badge';
+import { ToggleableSidebar } from '@/components/Sidebar';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { AlertTriangle, Clock, CheckCircle, X } from 'lucide-react';
 
 export function AlertPage({ onNavigate, onLogout }) {
@@ -106,11 +106,10 @@ export function AlertPage({ onNavigate, onLogout }) {
   const highPriorityCount = alerts.filter((alert) => alert.priority === 'high' && alert.status === 'active').length;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      <Sidebar currentPage="alerts" onNavigate={onNavigate} onLogout={onLogout} />
-
-      <div className="flex-1 p-6">
-        <div className="flex justify-between items-center mb-6">
+    <ToggleableSidebar currentPage="alerts" onNavigate={onNavigate} onLogout={onLogout}>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Alerts</h1>
             <p className="text-gray-600 mt-1">
@@ -143,6 +142,7 @@ export function AlertPage({ onNavigate, onLogout }) {
           </div>
         </div>
 
+        {/* Alerts List */}
         <div className="space-y-4">
           {filteredAlerts.map((alert) => (
             <Card key={alert.id} className="p-6">
@@ -201,6 +201,7 @@ export function AlertPage({ onNavigate, onLogout }) {
           ))}
         </div>
 
+        {/* Empty State */}
         {filteredAlerts.length === 0 && (
           <Card className="p-8 text-center">
             <AlertTriangle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -215,6 +216,6 @@ export function AlertPage({ onNavigate, onLogout }) {
           </Card>
         )}
       </div>
-    </div>
+    </ToggleableSidebar>
   );
 }
