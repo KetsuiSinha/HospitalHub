@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from './ui/button';
+import { Github, Linkedin, Twitter } from 'lucide-react';
 
 export function LandingPage({ onNavigate }) {
   return (
@@ -10,9 +11,9 @@ export function LandingPage({ onNavigate }) {
         
         <div className="hidden md:flex items-center space-x-6">
           <a href="#" className="hover:text-primary">Home</a>
-          <a href="#" className="hover:text-primary">Features</a>
-          <a href="#" className="hover:text-primary">About</a>
-          <a href="#" className="hover:text-primary">Contact</a>
+          <a href="#features" className="hover:text-primary">Features</a>
+          <a href="#about" className="hover:text-primary">About</a>
+          <a href="#contact" className="hover:text-primary">Contact</a>
         </div>
 
         <div className="flex items-center space-x-3">
@@ -68,7 +69,7 @@ export function LandingPage({ onNavigate }) {
       </section>
 
       {/* Features Section */}
-      <section className="px-8 py-16">
+      <section id="features" className="px-8 py-16">
         <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
           <div className="bg-card p-6 rounded-xl shadow-md border border-border">
             <h3 className="text-lg font-bold text-foreground mb-3">Inventory Management</h3>
@@ -83,6 +84,29 @@ export function LandingPage({ onNavigate }) {
           <div className="bg-card p-6 rounded-xl shadow-md border border-border">
             <h3 className="text-lg font-bold text-foreground mb-3">Staff Management</h3>
             <p className="text-muted-foreground">Daily presence, roles, duty roster overview.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* About Section */}
+      <section id="about" className="px-8 py-20 bg-muted/30">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-foreground mb-4">About Hospibot</h2>
+            <p className="text-muted-foreground leading-relaxed mb-6">
+              At Hospibot, our mission is simple — make healthcare smarter and more accessible.  
+              By combining AI with hospital management, we help reduce human error, optimize resources,  
+              and ensure doctors and staff focus more on patients, not paperwork.
+            </p>
+            <p className="text-muted-foreground">
+              From inventory predictions to smart staff allocation, Hospibot is designed  
+              to grow alongside your hospital and improve decision-making at every level.
+            </p>
+          </div>
+          <div className="flex justify-center">
+            <div className="w-64 h-64 bg-card border border-border rounded-2xl shadow-md flex items-center justify-center">
+              <span className="text-muted-foreground">[ Illustration / Logo ]</span>
+            </div>
           </div>
         </div>
       </section>
@@ -104,10 +128,34 @@ export function LandingPage({ onNavigate }) {
       </section>
 
       {/* Footer */}
-      <footer className="px-8 py-6 border-t border-border">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-          <p className="text-muted-foreground">© 2025 Hospibot. All rights reserved.</p>
-          <p className="text-muted-foreground">Privacy • Terms • Contact</p>
+      <footer id="contact" className="px-8 py-12 border-t border-border bg-background">
+        <div className="max-w-6xl mx-auto grid md:grid-cols-3 gap-10">
+          {/* Brand */}
+          <div>
+            <h3 className="text-xl font-bold text-primary">hospibot</h3>
+            <p className="text-muted-foreground mt-2">
+              AI-driven hospital management for a smarter, healthier future.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div className="flex flex-col space-y-2">
+            <a href="#about" className="text-muted-foreground hover:text-primary">About</a>
+            <a href="#features" className="text-muted-foreground hover:text-primary">Features</a>
+            <a href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</a>
+            <a href="#" className="text-muted-foreground hover:text-primary">Terms of Service</a>
+          </div>
+
+          {/* Socials */}
+          <div className="flex space-x-4 items-center">
+            <a href="#" className="text-muted-foreground hover:text-primary"><Github size={20} /></a>
+            <a href="#" className="text-muted-foreground hover:text-primary"><Linkedin size={20} /></a>
+            <a href="#" className="text-muted-foreground hover:text-primary"><Twitter size={20} /></a>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center text-sm text-muted-foreground">
+          © 2025 Hospibot. All rights reserved.
         </div>
       </footer>
     </div>
