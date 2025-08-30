@@ -344,42 +344,39 @@ export function LandingPage({ onNavigate }) {
 
 
       {/* ===== FOOTER ===== */}
-      <footer className="w-full py-20 lg:py-40 bg-foreground text-background px-6 md:px-12">
+      {/* ===== FOOTER ===== */}
+      <footer className="w-full py-12 lg:py-16 bg-foreground text-background px-6 md:px-12">
         <div className="container mx-auto">
           <div className="grid lg:grid-cols-2 gap-10 items-start">
             {/* Left */}
-            <div className="flex gap-8 flex-col items-start">
+            <div className="flex gap-6 flex-col items-start">
               <div className="flex gap-2 flex-col">
-                <h2 className="text-2xl md:text-4xl tracking-tighter max-w-xl font-semibold text-left">
+                <h2 className="text-xl md:text-2xl tracking-tighter max-w-xl font-semibold text-left">
                   hospibot
                 </h2>
-                <p className="text-base md:text-lg max-w-lg leading-relaxed tracking-tight text-background/75 text-left">
+                <p className="text-sm md:text-base max-w-lg leading-relaxed tracking-tight text-background/75 text-left">
                   AI-driven hospital management for a smarter, healthier future.
                 </p>
-              </div>
-              <div className="flex gap-20 flex-row">
-                <div className="flex flex-col text-sm leading-relaxed tracking-tight text-background/75 text-left">
-                </div>
               </div>
             </div>
 
             {/* Right navigation */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-10 items-start">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 items-start">
               {navigationItems.map((item) => (
-                <div key={item.title} className="flex flex-col gap-2 items-start">
+                <div key={item.title} className="flex flex-col gap-1.5 items-start">
                   {item.href ? (
-                    <Link href={item.href} className="text-base font-medium">
+                    <Link href={item.href} className="text-sm md:text-base font-medium">
                       {item.title}
                     </Link>
                   ) : (
-                    <p className="text-base font-medium">{item.title}</p>
+                    <p className="text-sm md:text-base font-medium">{item.title}</p>
                   )}
                   {item.items &&
                     item.items.map((subItem) => (
                       <Link
                         key={subItem.title}
                         href={subItem.href}
-                        className="text-background/75 text-sm leading-relaxed"
+                        className="text-background/75 text-xs md:text-sm leading-relaxed"
                       >
                         {subItem.title}
                       </Link>
