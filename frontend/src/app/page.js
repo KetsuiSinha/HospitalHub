@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { LandingPage } from "@/components/LandingPage";
 import { LoginPage } from "@/components/auth_pages/LoginPage";
 import { SignupPage } from "@/components/SignUpPage";
-import {Dashboard} from "@/components/Dashboard";
+import { Dashboard } from "@/components/Dashboard";
 import { InventoryPage } from "@/components/inventory/InventoryPage";
 import { AlertPage } from "@/components/AlertPage";
 import { StaffPage } from "@/components/inventory/StaffPage";
@@ -71,7 +71,7 @@ export default function App({ Component, pageProps }) {
         return <AlertPage onNavigate={navigate} onLogout={handleLogout} />;
       case "staff":
         return <StaffPage onNavigate={navigate} onLogout={handleLogout} />;
-        case "settings":
+      case "settings":
         return <SettingsPage onNavigate={navigate} onLogout={handleLogout} />;
       default:
         return <LandingPage onNavigate={navigate} />;

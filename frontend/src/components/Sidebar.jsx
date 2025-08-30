@@ -1,6 +1,6 @@
 import React from 'react';
-import { 
-  LayoutDashboard, Package, AlertTriangle, Users, Settings, LogOut, Menu 
+import {
+  LayoutDashboard, Package, AlertTriangle, Users, Settings, LogOut, Menu
 } from 'lucide-react';
 import {
   Sidebar,
@@ -165,9 +165,9 @@ export default function SidebarDemo() {
   };
 
   return (
-    <ToggleableSidebar 
-      currentPage={currentPage} 
-      onNavigate={handleNavigate} 
+    <ToggleableSidebar
+      currentPage={currentPage}
+      onNavigate={handleNavigate}
       onLogout={handleLogout}
     >
       {getPageContent()}

@@ -10,27 +10,27 @@ import { getAuthUser } from '@/lib/api';
 export function SettingsPage({ onNavigate, onLogout }) {
   const [user, setUser] = useState(() => getAuthUser() || { name: '—', email: '—' });
 
-// inside SettingsPage.jsx
-const [theme, setTheme] = useState(() => {
-  return localStorage.getItem('app-theme') || 'default';
-});
+  // inside SettingsPage.jsx
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('app-theme') || 'default';
+  });
 
-useEffect(() => {
-  const root = document.documentElement;
-  root.classList.remove('default', 'light', 'dark');
+  useEffect(() => {
+    const root = document.documentElement;
+    root.classList.remove('default', 'light', 'dark');
 
-  if (theme === 'dark') root.classList.add('dark');
-  else if (theme === 'light') root.classList.add('light');
-  else root.classList.add('default');
+    if (theme === 'dark') root.classList.add('dark');
+    else if (theme === 'light') root.classList.add('light');
+    else root.classList.add('default');
 
-  // persist theme
-  localStorage.setItem('app-theme', theme);
-}, [theme]);
+    // persist theme
+    localStorage.setItem('app-theme', theme);
+  }, [theme]);
 
-useEffect(() => {
-  const u = getAuthUser();
-  if (u) setUser(u);
-}, []);
+  useEffect(() => {
+    const u = getAuthUser();
+    if (u) setUser(u);
+  }, []);
 
   return (
     <ToggleableSidebar currentPage="settings" onNavigate={onNavigate} onLogout={onLogout}>

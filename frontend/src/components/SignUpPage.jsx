@@ -81,8 +81,8 @@ export function SignupPage({ onNavigate, onLogin }) {
                     id === "email"
                       ? setEmail(e.target.value)
                       : id === "password"
-                      ? setPassword(e.target.value)
-                      : setConfirmPassword(e.target.value)
+                        ? setPassword(e.target.value)
+                        : setConfirmPassword(e.target.value)
                   }
                   className="pl-10"
                   placeholder={placeholder}

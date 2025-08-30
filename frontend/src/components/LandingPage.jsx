@@ -183,7 +183,7 @@ export function LandingPage({ onNavigate }) {
         className="flex flex-col items-center justify-center gap-8 text-center pt-40 pb-20"
       >
         <Button variant="secondary" size="sm" className="gap-2">
-          Made for doctors powered by engineers
+          Made for doctors powered by engineers.
         </Button>
         <h1 className="text-4xl md:text-6xl tracking-tighter font-bold max-w-3xl">
           AI-powered healthcare made{" "}
@@ -222,63 +222,63 @@ export function LandingPage({ onNavigate }) {
 
       {/* ===== FEATURES ===== */}
       <section id="features" className="w-full py-20 lg:py-32 px-6 md:px-12">
-  <div className="container mx-auto">
-    <div className="flex flex-col gap-10">
-      <div className="flex gap-4 flex-col items-start">
-        <Badge>Platform</Badge>
-        <div className="flex gap-2 flex-col">
-          <h2 className="text-2xl md:text-4xl tracking-tighter max-w-xl font-semibold text-left">
-            Smarter healthcare management
-          </h2>
-          <p className="text-base md:text-lg max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
-            Everything you need to streamline hospital operations.
-          </p>
-        </div>
-      </div>
+        <div className="container mx-auto">
+          <div className="flex flex-col gap-10">
+            <div className="flex gap-4 flex-col items-start">
+              <Badge>Platform</Badge>
+              <div className="flex gap-2 flex-col">
+                <h2 className="text-2xl md:text-4xl tracking-tighter max-w-xl font-semibold text-left">
+                  Smarter healthcare management
+                </h2>
+                <p className="text-base md:text-lg max-w-lg leading-relaxed tracking-tight text-muted-foreground text-left">
+                  Everything you need to streamline hospital operations.
+                </p>
+              </div>
+            </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          {
-            title: "About Hospibot",
-            desc: "Smarter, AI-powered healthcare management.",
-            icon: Hospital,
-          },
-          {
-            title: "Inventory",
-            desc: "Auto-track stock, expiry, and alerts.",
-            icon: Boxes,
-          },
-          {
-            title: "AI Alerts",
-            desc: "Instant, location-aware notifications.",
-            icon: BellRing,
-          },
-          {
-            title: "Staff",
-            desc: "Manage attendance, roles, and shifts.",
-            icon: UserCog,
-          },
-        ].map((item, idx) => (
-          <div
-            key={idx}
-            className="bg-card text-card-foreground rounded-lg p-4 flex flex-col justify-between h-48 shadow-md"
-          >
-            <item.icon className="w-6 h-6 stroke-1" />
-            <div>
-              <h3 className="text-base font-medium tracking-tight">
-                {item.title}
-              </h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {item.desc}
-              </p>
+            {/* Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[
+                {
+                  title: "About Hospibot",
+                  desc: "Smarter, AI-powered healthcare management.",
+                  icon: Hospital,
+                },
+                {
+                  title: "Inventory",
+                  desc: "Auto-track stock, expiry, and alerts.",
+                  icon: Boxes,
+                },
+                {
+                  title: "AI Alerts",
+                  desc: "Instant, location-aware notifications.",
+                  icon: BellRing,
+                },
+                {
+                  title: "Staff",
+                  desc: "Manage attendance, roles, and shifts.",
+                  icon: UserCog,
+                },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-card text-card-foreground rounded-lg p-4 flex flex-col justify-between h-48 shadow-md"
+                >
+                  <item.icon className="w-6 h-6 stroke-1" />
+                  <div>
+                    <h3 className="text-base font-medium tracking-tight">
+                      {item.title}
+                    </h3>
+                    <p className="text-muted-foreground text-sm leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
+        </div>
+      </section>
 
       {/* ===== FAQ ===== */}
       <section id="faq" className="w-full py-20 lg:py-40 px-6 md:px-12">
@@ -298,23 +298,50 @@ export function LandingPage({ onNavigate }) {
             </div>
 
             <Accordion type="single" collapsible className="w-full">
-              {["How does Hospibot help doctors?", "Can Hospibot manage medicine expiry?", "Does it track staff attendance?", "Is my data secure?"].map(
-                (q, i) => (
-                  <AccordionItem key={i} value={"faq-" + i}>
-                    <AccordionTrigger className="text-base font-medium tracking-tight">
-                      {q}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
-                      Managing healthcare is already tough. Hospibot makes it
-                      easier with automation, AI insights, and secure systems.
-                    </AccordionContent>
-                  </AccordionItem>
-                )
-              )}
+              {[
+                {
+                  q: "How does Hospibot help doctors?",
+                  a: "Hospibot reduces administrative burden by automating routine tasks like patient scheduling, report generation, and treatment reminders, so doctors can spend more time focusing on patients."
+                },
+                {
+                  q: "Can Hospibot manage medicine expiry?",
+                  a: "Yes, Hospibot auto-tracks your medicine inventory, alerts you about upcoming expirations, and helps prevent wastage by ensuring timely restocking."
+                },
+                {
+                  q: "Does it track staff attendance?",
+                  a: "Hospibot includes smart staff management features — it logs attendance, monitors shifts, and manages role-based access, making HR workflows smoother."
+                },
+                {
+                  q: "Is my data secure?",
+                  a: "Absolutely. Hospibot uses encrypted storage, secure authentication, and role-based permissions to ensure your hospital data stays protected at all times."
+                },
+                {
+                  q: "Can Hospibot integrate with existing hospital systems?",
+                  a: "Yes, Hospibot offers seamless integration with popular EMR and hospital management systems, so you can get started without overhauling your existing workflow."
+                },
+                {
+                  q: "Does Hospibot provide AI-driven insights?",
+                  a: "Hospibot analyzes patient records, staff performance, and operational data to provide predictive insights that help in decision-making and resource planning."
+                },
+                {
+                  q: "Is Hospibot scalable for large hospitals?",
+                  a: "Definitely. Hospibot is designed to scale — whether you're a small clinic or a multi-branch hospital chain, the system grows with your needs."
+                }
+              ].map((item, i) => (
+                <AccordionItem key={i} value={"faq-" + i}>
+                  <AccordionTrigger className="text-base font-medium tracking-tight">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-sm leading-relaxed text-muted-foreground">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
             </Accordion>
           </div>
         </div>
       </section>
+
 
       {/* ===== FOOTER ===== */}
       <footer className="w-full py-20 lg:py-40 bg-foreground text-background px-6 md:px-12">

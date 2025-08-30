@@ -87,7 +87,7 @@ export function Dashboard({ onNavigate, onLogout }) {
             <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--foreground)' }}>Staff Attendance</h2>
             <div className="flex items-center justify-center mb-4">
               <div className="relative w-32 h-32">
-                <div className="absolute inset-0" style={{ backgroundColor: 'var(--muted)' , borderRadius: '50%'}}></div>
+                <div className="absolute inset-0" style={{ backgroundColor: 'var(--muted)', borderRadius: '50%' }}></div>
                 <div
                   className="absolute inset-0 rounded-full"
                   style={{

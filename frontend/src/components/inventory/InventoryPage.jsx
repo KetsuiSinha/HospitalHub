@@ -116,16 +116,16 @@ export function InventoryPage({ onNavigate, onLogout }) {
       setMedicines(medicines.map(med =>
         med.id === editingMedicine.id
           ? {
-              ...med,
-              name: formData.name,
-              stock: parseInt(formData.stock),
-              expiry: formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString() : '-',
-              expiryDate: formData.expiryDate || '',
-              manufacturer: formData.manufacturer || '-',
-              dosageForm: formData.dosageForm,
-              strength: formData.strength || '',
-              critical: !!formData.critical,
-            }
+            ...med,
+            name: formData.name,
+            stock: parseInt(formData.stock),
+            expiry: formData.expiryDate ? new Date(formData.expiryDate).toLocaleDateString() : '-',
+            expiryDate: formData.expiryDate || '',
+            manufacturer: formData.manufacturer || '-',
+            dosageForm: formData.dosageForm,
+            strength: formData.strength || '',
+            critical: !!formData.critical,
+          }
           : med
       ));
       setEditingMedicine(null);

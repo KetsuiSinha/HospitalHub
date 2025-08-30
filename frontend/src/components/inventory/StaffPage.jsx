@@ -183,7 +183,7 @@ export function StaffPage({ onNavigate, onLogout }) {
             <table className="w-full">
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {['Name','Role','Department','Shift','Status','Clock In'].map((th) => (
+                  {['Name', 'Role', 'Department', 'Shift', 'Status', 'Clock In'].map((th) => (
                     <th key={th} className="text-left py-3 px-4" style={{ color: 'var(--foreground)', fontWeight: '500' }}>{th}</th>
                   ))}
                 </tr>
