@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  LayoutDashboard, Package, AlertTriangle, Users, Settings, LogOut, Menu
+  LayoutDashboard, Package, AlertTriangle, Users, Settings, LogOut, Menu, Building2
 } from 'lucide-react';
 import {
   Sidebar,
@@ -16,8 +16,20 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from '@/components/ui/sidebar';
+import { getAuthUser } from '@/lib/api';
 
 export function ToggleableSidebar({ currentPage, onNavigate, onLogout, children }) {
+  const [userHospital, setUserHospital] = useState("");
+  const [userCity, setUserCity] = useState("");
+
+  useEffect(() => {
+    const user = getAuthUser();
+    if (user && user.hospital) {
+      setUserHospital(user.hospital);
+      setUserCity(user.city || "");
+    }
+  }, []);
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'inventory', label: 'Inventory', icon: Package },
@@ -35,7 +47,15 @@ export function ToggleableSidebar({ currentPage, onNavigate, onLogout, children 
               <div className="w-8 h-8 bg-blue-700 rounded-md flex items-center justify-center">
                 <Package className="w-4 h-4 text-white" />
               </div>
-              <h1 className="text-xl font-bold text-[var(--foreground)]">hospibot</h1>
+              <div>
+                <h1 className="text-xl font-bold text-[var(--foreground)]">hospibot</h1>
+                {(userHospital || userCity) && (
+                  <div className="flex items-center text-xs text-[var(--muted-foreground)] mt-1">
+                    <Building2 className="w-3 h-3 mr-1" />
+                    {[userHospital, userCity].filter(Boolean).join(" • ")}
+                  </div>
+                )}
+              </div>
             </div>
           </SidebarHeader>
 

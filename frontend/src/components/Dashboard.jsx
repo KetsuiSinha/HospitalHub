@@ -1,15 +1,50 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ToggleableSidebar } from '@/components/Sidebar';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { Building2 } from 'lucide-react';
+import { getAuthUser, attendanceApi, medicinesApi } from '@/lib/api';
 
 export function Dashboard({ onNavigate, onLogout }) {
-  const inventoryItems = [
-    { name: 'Paracetamol 500mg', stock: 320, maxStock: 500 },
-    { name: 'Amoxicillin 250mg', stock: 180, maxStock: 300 },
-    { name: 'ORS Sachets', stock: 45, maxStock: 200 },
-    { name: 'Vitamin D3 60k IU', stock: 85, maxStock: 150 },
-  ];
+  const [userHospital, setUserHospital] = useState("");
+  const [userCity, setUserCity] = useState("");
+  const [staffStats, setStaffStats] = useState({ present: 0, total: 0, doctors: 0, nurses: 0 });
+  const [inventoryItems, setInventoryItems] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+
+  useEffect(() => {
+    const user = getAuthUser();
+    if (user && user.hospital) {
+      setUserHospital(user.hospital);
+      setUserCity(user.city || "");
+    }
+    // Load attendance summary
+    const load = async () => {
+      try {
+        const sum = await attendanceApi.today(new Date(selectedDate).toISOString());
+        setStaffStats({
+          present: sum.present || 0,
+          total: sum.total || 0,
+          doctors: sum.doctorsPresent || 0,
+          nurses: sum.nursesPresent || 0,
+        });
+      } catch {}
+      try {
+        const meds = await medicinesApi.list();
+        const items = (meds || [])
+          .slice(0, 4)
+          .map((m) => ({
+            name: m.name,
+            stock: m.stock || 0,
+            maxStock: 500, // default capacity
+          }));
+        setInventoryItems(items);
+      } catch {}
+    };
+    load();
+  }, [selectedDate]);
+
+  
 
   const alerts = [
     { text: '[High] Oxygen supply low in ICU', priority: 'high' },
@@ -17,7 +52,6 @@ export function Dashboard({ onNavigate, onLogout }) {
     { text: '[Low] Paracetamol near expiry', priority: 'low' },
   ];
 
-  const staffStats = { present: 24, total: 30, doctors: 8, nurses: 16 };
   const recommendations = [
     'Order 200 ORS sachets',
     'Increase stock: Amoxicillin 250mg',
@@ -42,6 +76,12 @@ export function Dashboard({ onNavigate, onLogout }) {
             <p style={{ color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>
               Overview of inventory, alerts, staff attendance, and AI recommendations
             </p>
+            {(userHospital || userCity) && (
+              <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                <Building2 className="w-4 h-4 mr-2" />
+                {[userHospital, userCity].filter(Boolean).join(" • ")}
+              </div>
+            )}
           </div>
         </div>
 
@@ -85,6 +125,10 @@ export function Dashboard({ onNavigate, onLogout }) {
           {/* Staff Attendance */}
           <Card className="p-6" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
             <h2 className="text-lg font-bold mb-4" style={{ color: 'var(--foreground)' }}>Staff Attendance</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <label htmlFor="dash-date" className="text-sm text-muted-foreground">Date</label>
+              <input id="dash-date" type="date" value={selectedDate} max={new Date().toISOString().slice(0,10)} onChange={(e) => setSelectedDate(e.target.value)} className="px-2 py-1 rounded-md border" style={{ backgroundColor: 'var(--input)', color: 'var(--foreground)', borderColor: 'var(--border)' }} />
+            </div>
             <div className="flex items-center justify-center mb-4">
               <div className="relative w-32 h-32">
                 <div className="absolute inset-0" style={{ backgroundColor: 'var(--muted)', borderRadius: '50%' }}></div>

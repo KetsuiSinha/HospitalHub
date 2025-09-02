@@ -9,7 +9,8 @@ const inventorySchema = new mongoose.Schema({
   },
   quantity: { type: Number, required: true, min: 0 },
   threshold: { type: Number, default: 10 },
-  lastUpdated: { type: Date, default: Date.now }
+  lastUpdated: { type: Date, default: Date.now },
+  hospital: { type: String, required: true, enum: ["City General Hospital", "Memorial Medical Center", "St. Mary's Hospital", "Regional Health Center", "Community Medical Center", "University Hospital"] }
 });
 
 module.exports = mongoose.model("Inventory", inventorySchema);

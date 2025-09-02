@@ -26,6 +26,8 @@ app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/medicines", authMiddleware, require("./src/routes/medicineRoutes"));
 app.use("/api/inventory", authMiddleware, require("./src/routes/inventoryRoutes"));
 app.use("/api/recommendations", authMiddleware, require("./src/routes/recommendationRoutes"));
+app.use("/api/staff", require("./src/routes/staffRoutes"));
+app.use("/api/attendance", require("./src/routes/attendanceRoutes"));
 
 app.get("/", (req, res) => {
   res.send("Hospital Management API Running ✅");

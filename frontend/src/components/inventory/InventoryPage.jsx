@@ -19,13 +19,15 @@ import {
   TableBody,
   TableCell,
 } from "@/components/ui/table"
-import { Edit, Trash2, Plus, Package } from "lucide-react"
-import { medicinesApi } from "@/lib/api"
+import { Edit, Trash2, Plus, Package, Building2 } from "lucide-react"
+import { medicinesApi, getAuthUser } from "@/lib/api"
 
 export function InventoryPage({ onNavigate, onLogout }) {
   const [medicines, setMedicines] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const [userHospital, setUserHospital] = useState("")
+  const [userCity, setUserCity] = useState("")
 
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingMedicine, setEditingMedicine] = useState(null)
@@ -38,6 +40,14 @@ export function InventoryPage({ onNavigate, onLogout }) {
     stock: "",
     critical: false,
   })
+
+  useEffect(() => {
+    const user = getAuthUser();
+    if (user && user.hospital) {
+      setUserHospital(user.hospital);
+      setUserCity(user.city || "");
+    }
+  }, []);
 
   const fetchMedicines = async () => {
     setLoading(true)
@@ -207,7 +217,15 @@ export function InventoryPage({ onNavigate, onLogout }) {
       <div className="min-h-screen bg-background">
         <div className="p-6 space-y-6 text-foreground font-sans">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 className="text-2xl font-bold text-foreground">Inventory Management</h1>
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">Inventory Management</h1>
+              {(userHospital || userCity) && (
+                <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                  <Building2 className="w-4 h-4 mr-2" />
+                  {[userHospital, userCity].filter(Boolean).join(" • ")}
+                </div>
+              )}
+            </div>
 
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>

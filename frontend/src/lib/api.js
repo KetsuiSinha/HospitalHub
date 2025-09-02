@@ -43,6 +43,17 @@ export const authApi = {
       body: JSON.stringify(payload),
     });
   },
+  async checkHospitalAdmin(hospital) {
+    return request(`/api/auth/check-hospital-admin/${encodeURIComponent(hospital)}`, {
+      method: "GET",
+    });
+  },
+  async inviteStaff(payload) {
+    return request("/api/auth/invite-staff", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+  },
 };
 
 // Medicines
@@ -74,6 +85,40 @@ export const inventoryApi = {
   },
   remove(id) {
     return request(`/api/inventory/${id}`, { method: "DELETE" });
+  },
+};
+
+// Staff
+export const staffApi = {
+  list(dateIso) {
+    const q = dateIso ? `?date=${encodeURIComponent(dateIso)}` : "";
+    return request(`/api/staff${q}`, { method: "GET" });
+  },
+  create(payload) {
+    return request("/api/staff", { method: "POST", body: JSON.stringify(payload) });
+  },
+  update(id, payload) {
+    return request(`/api/staff/${id}`, { method: "PUT", body: JSON.stringify(payload) });
+  },
+  remove(id) {
+    return request(`/api/staff/${id}`, { method: "DELETE" });
+  },
+};
+
+// Attendance
+export const attendanceApi = {
+  today(dateIso) {
+    const q = dateIso ? `?date=${encodeURIComponent(dateIso)}` : "";
+    return request(`/api/attendance/today${q}`, { method: "GET" });
+  },
+  clockIn(staffId) {
+    return request("/api/attendance/clock-in", { method: "POST", body: JSON.stringify({ staffId }) });
+  },
+  clockOut(staffId) {
+    return request("/api/attendance/clock-out", { method: "POST", body: JSON.stringify({ staffId }) });
+  },
+  setStatus(payload) {
+    return request("/api/attendance/set-status", { method: "POST", body: JSON.stringify(payload) });
   },
 };
 
