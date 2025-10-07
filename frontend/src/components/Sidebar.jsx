@@ -17,6 +17,8 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { getAuthUser } from '@/lib/api';
+import { Calendar } from "@/components/ui/calendar";
+
 
 export function ToggleableSidebar({ currentPage, onNavigate, onLogout, children }) {
   const [userHospital, setUserHospital] = useState("");
@@ -44,15 +46,16 @@ export function ToggleableSidebar({ currentPage, onNavigate, onLogout, children 
         <Sidebar className="transition-all duration-300 ease-in-out bg-[var(--card)] border-r border-gray-200">
           <SidebarHeader>
             <div className="flex items-center space-x-2 px-2">
-              <div className="w-8 h-8 bg-blue-700 rounded-md flex items-center justify-center">
-                <Package className="w-4 h-4 text-white" />
-              </div>
+              <img
+                src="/logo_hospibot.png"
+                alt="Hospibot Logo"
+                className="h-30 w-auto object-contain"
+              />
               <div>
-                <h1 className="text-xl font-bold text-[var(--foreground)]">hospibot</h1>
                 {(userHospital || userCity) && (
                   <div className="flex items-center text-xs text-[var(--muted-foreground)] mt-1">
-                    <Building2 className="w-3 h-3 mr-1" />
-                    {[userHospital, userCity].filter(Boolean).join(" • ")}
+                    <Building2 className="w-10 h-10 mr-1" />
+                    {[userHospital, userCity].filter(Boolean).join(", ")}
                   </div>
                 )}
               </div>
@@ -166,12 +169,18 @@ export default function SidebarDemo() {
           </div>
         );
       case 'staff':
-        return (
-          <div className="p-6 text-[var(--foreground)]">
-            <h2 className="text-2xl font-bold mb-4">Staff Management</h2>
-            <p>Manage hospital staff and schedules.</p>
-          </div>
-        );
+  return (
+    <div className="p-6 text-[var(--foreground)]">
+      <h2 className="text-2xl font-bold mb-4">Staff Attendance</h2>
+      <p className="mb-4 text-sm text-[var(--muted-foreground)]">
+        View and manage attendance records using the interactive calendar below.
+      </p>
+
+      <div className="bg-[var(--card)] p-6 rounded-lg border shadow-sm max-w-md">
+        <Calendar mode="single" selected={new Date()} />
+      </div>
+    </div>
+  );
       case 'settings':
         return (
           <div className="p-6 text-[var(--foreground)]">

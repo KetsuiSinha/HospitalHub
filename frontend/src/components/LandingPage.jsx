@@ -124,7 +124,13 @@ export function LandingPage({ onNavigate }) {
 
           {/* Logo */}
           <div className="flex lg:justify-center">
-            <p className="font-bold text-lg text-primary tracking-tight">hospibot</p>
+            <Link href="#home">
+              <img
+                src="/logo_hospibot.png"
+                alt="Hospibot Logo"
+                className="h-25 w-25"
+              />
+            </Link>
           </div>
 
           {/* Actions */}
