@@ -1,205 +1,188 @@
-import React, { useEffect, useState } from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
+import Link from 'next/link';
 import {
-  LayoutDashboard, Package, AlertTriangle, Users, Settings, LogOut, Menu, Building2
+  LayoutDashboard,
+  Package,
+  AlertTriangle,
+  Users,
+  Settings,
+  LogOut,
+  ChevronRight,
+  UserPlus,
+  CalendarCheck
 } from 'lucide-react';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarProvider,
+  SidebarRail,
   SidebarTrigger,
-  SidebarHeader,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
-import { getAuthUser } from '@/lib/api';
-import { Calendar } from "@/components/ui/calendar";
+  useSidebar
+} from "@/components/ui/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { getAuthUser, clearAuth } from '@/lib/api';
 
-
-export function ToggleableSidebar({ currentPage, onNavigate, onLogout, children }) {
-  const [userHospital, setUserHospital] = useState("");
-  const [userCity, setUserCity] = useState("");
-
-  useEffect(() => {
-    const user = getAuthUser();
-    if (user && user.hospital) {
-      setUserHospital(user.hospital);
-      setUserCity(user.city || "");
-    }
-  }, []);
-
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'inventory', label: 'Inventory', icon: Package },
-    { id: 'alerts', label: 'Alerts', icon: AlertTriangle },
-    { id: 'staff', label: 'Staff', icon: Users },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
-
+export function AppSidebar({ children }) {
+  // This wrapper component is for the layout to use. 
+  // It provides the SidebarProvider and renders the Sidebar + Children.
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full" style={{ backgroundColor: 'var(--background)' }}>
-        <Sidebar className="transition-all duration-300 ease-in-out bg-[var(--card)] border-r border-gray-200">
-          <SidebarHeader>
-            <div className="flex items-center space-x-2 px-2">
-              <img
-                src="/logo_hospibot.png"
-                alt="Hospibot Logo"
-                className="h-30 w-auto object-contain"
-              />
-              <div>
-                {(userHospital || userCity) && (
-                  <div className="flex items-center text-xs text-[var(--muted-foreground)] mt-1">
-                    <Building2 className="w-10 h-10 mr-1" />
-                    {[userHospital, userCity].filter(Boolean).join(", ")}
-                  </div>
-                )}
-              </div>
-            </div>
-          </SidebarHeader>
-
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupLabel style={{ color: 'var(--muted-foreground)' }}>Navigation</SidebarGroupLabel>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {menuItems.map((item) => (
-                    <SidebarMenuItem key={item.id}>
-                      <SidebarMenuButton
-                        onClick={() => onNavigate(item.id)}
-                        isActive={currentPage === item.id}
-                        className="w-full"
-                      >
-                        <item.icon className="w-4 h-4" />
-                        <span>{item.label}</span>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-
-          <SidebarFooter>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  onClick={onLogout}
-                  className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarFooter>
-        </Sidebar>
-
-        <main className="flex-1 w-full min-w-0 flex flex-col">
-          <header className="bg-[var(--card)] border-b border-gray-200 p-4 sticky top-0 z-10 flex-shrink-0">
-            <div className="flex items-center space-x-4">
-              <SidebarTrigger className="p-2 hover:bg-gray-100 rounded-md transition-colors">
-                <Menu className="w-5 h-5" />
-              </SidebarTrigger>
-              <h1 className="text-lg font-semibold capitalize text-[var(--foreground)]">{currentPage}</h1>
-            </div>
-          </header>
-
-          <div className="flex-1 w-full">
-            {children}
-          </div>
-        </main>
-      </div>
+      <AppSidebarContent />
+      <main className="flex-1 overflow-auto bg-gray-50 p-6 w-full">
+        <div className="flex items-center gap-4 mb-6">
+          <SidebarTrigger />
+          <span className="font-semibold md:hidden">HospitalHub</span>
+        </div>
+        {children}
+      </main>
     </SidebarProvider>
   );
 }
 
-// Demo usage
-export default function SidebarDemo() {
-  const [currentPage, setCurrentPage] = React.useState('dashboard');
+function AppSidebarContent() {
+  const pathname = usePathname();
+  const [user, setUser] = useState(null);
 
-  const handleNavigate = (pageId) => setCurrentPage(pageId);
-  const handleLogout = () => alert('Logout clicked!');
+  useEffect(() => {
+    setUser(getAuthUser());
+  }, []);
 
-  const getPageContent = () => {
-    switch (currentPage) {
-      case 'dashboard':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4 text-[var(--foreground)]">Dashboard</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-[var(--card)] p-6 rounded-lg border shadow-sm">
-                <h3 className="text-lg font-semibold mb-2 text-[var(--foreground)]">Total Inventory</h3>
-                <p className="text-3xl font-bold text-blue-600">1,247</p>
-              </div>
-              <div className="bg-[var(--card)] p-6 rounded-lg border shadow-sm">
-                <h3 className="text-lg font-semibold mb-2 text-[var(--foreground)]">Low Stock Items</h3>
-                <p className="text-3xl font-bold text-orange-600">23</p>
-              </div>
-              <div className="bg-[var(--card)] p-6 rounded-lg border shadow-sm">
-                <h3 className="text-lg font-semibold mb-2 text-[var(--foreground)]">Active Staff</h3>
-                <p className="text-3xl font-bold text-green-600">42</p>
-              </div>
-            </div>
-          </div>
-        );
-      case 'inventory':
-        return (
-          <div className="p-6 text-[var(--foreground)]">
-            <h2 className="text-2xl font-bold mb-4">Inventory Management</h2>
-            <p>Manage your hospital inventory items here.</p>
-          </div>
-        );
-      case 'alerts':
-        return (
-          <div className="p-6 text-[var(--foreground)]">
-            <h2 className="text-2xl font-bold mb-4">Alerts</h2>
-            <div className="space-y-2">
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-800">
-                Low stock: Surgical masks (5 units remaining)
-              </div>
-              <div className="bg-red-50 border-l-4 border-red-400 p-4 text-red-800">
-                Critical: ICU bed shortage
-              </div>
-            </div>
-          </div>
-        );
-      case 'staff':
-  return (
-    <div className="p-6 text-[var(--foreground)]">
-      <h2 className="text-2xl font-bold mb-4">Staff Attendance</h2>
-      <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-        View and manage attendance records using the interactive calendar below.
-      </p>
-
-      <div className="bg-[var(--card)] p-6 rounded-lg border shadow-sm max-w-md">
-        <Calendar mode="single" selected={new Date()} />
-      </div>
-    </div>
-  );
-      case 'settings':
-        return (
-          <div className="p-6 text-[var(--foreground)]">
-            <h2 className="text-2xl font-bold mb-4">Settings</h2>
-            <p>Configure application settings and preferences.</p>
-          </div>
-        );
-      default:
-        return <div className="p-6 text-[var(--foreground)]">Page not found</div>;
-    }
+  const handleLogout = () => {
+    clearAuth();
+    window.location.href = '/';
   };
 
+  const isActive = (path) => pathname === path;
+  const isStaffActive = pathname.startsWith('/staff');
+
   return (
-    <ToggleableSidebar
-      currentPage={currentPage}
-      onNavigate={handleNavigate}
-      onLogout={handleLogout}
-    >
-      {getPageContent()}
-    </ToggleableSidebar>
+    <Sidebar collapsible="icon">
+      <SidebarHeader>
+        <div className="flex items-center gap-2 px-2 py-1">
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden">
+            <img src="/logo_hospibot.png" alt="Hospibot Logo" className="h-full w-full object-contain" />
+          </div>
+          <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
+            <span className="truncate font-semibold">HospitalHub</span>
+            <span className="truncate text-xs">Inventory System</span>
+          </div>
+        </div>
+      </SidebarHeader>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+
+              {/* Dashboard */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/dashboard')} tooltip="Dashboard">
+                  <Link href="/dashboard">
+                    <LayoutDashboard />
+                    <span>Dashboard</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Inventory */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/inventory')} tooltip="Inventory">
+                  <Link href="/inventory">
+                    <Package />
+                    <span>Inventory</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Alerts */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/alerts')} tooltip="Alerts">
+                  <Link href="/alerts">
+                    <AlertTriangle />
+                    <span>Alerts</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Staff (Collapsible) */}
+              <Collapsible asChild defaultOpen={isStaffActive} className="group/collapsible">
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip="Staff">
+                      <Users />
+                      <span>Staff</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild isActive={isActive('/staff/management')}>
+                          <Link href="/staff/management">
+                            <UserPlus className="w-4 h-4 mr-2" />
+                            <span>Add Staff</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton asChild isActive={isActive('/staff/attendance')}>
+                          <Link href="/staff/attendance">
+                            <CalendarCheck className="w-4 h-4 mr-2" />
+                            <span>Attendance</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+
+              {/* Settings */}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isActive('/settings')} tooltip="Settings">
+                  <Link href="/settings">
+                    <Settings />
+                    <span>Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton onClick={handleLogout} tooltip="Log out">
+              <LogOut />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
   );
 }

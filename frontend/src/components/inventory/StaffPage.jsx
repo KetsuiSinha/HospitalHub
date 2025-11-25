@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { ToggleableSidebar } from '@/components/Sidebar';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, UserPlus, Clock, Stethoscope, Heart, Building2 } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+import { Users, UserPlus, Clock, Stethoscope, Heart, Building2, Search, CalendarIcon } from 'lucide-react';
 import { getAuthUser, staffApi, attendanceApi } from '@/lib/api';
 
 export function StaffPage({ onNavigate, onLogout }) {
@@ -32,7 +37,8 @@ export function StaffPage({ onNavigate, onLogout }) {
     }
   };
 
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [selectedDate, setSelectedDate] = useState(() => new Date());
+  const isToday = format(selectedDate, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
 
   useEffect(() => {
     const user = getAuthUser();
@@ -44,7 +50,7 @@ export function StaffPage({ onNavigate, onLogout }) {
     // Load staff and attendance
     const load = async () => {
       try {
-        const dateIso = new Date(selectedDate).toISOString();
+        const dateIso = selectedDate.toISOString();
         const [staffRes, summaryRes] = await Promise.all([
           staffApi.list(dateIso),
           attendanceApi.today(dateIso),
@@ -79,10 +85,10 @@ export function StaffPage({ onNavigate, onLogout }) {
           const at = new Date(now.getFullYear(), now.getMonth(), now.getDate(), Number(hh), Number(mm), 0, 0);
           timeIso = at.toISOString();
         }
-        await attendanceApi.setStatus({ staffId: created._id, status: formData.attendanceStatus, time: timeIso, date: new Date(selectedDate).toISOString() });
+        await attendanceApi.setStatus({ staffId: created._id, status: formData.attendanceStatus, time: timeIso, date: selectedDate.toISOString() });
         const [summaryRes, staffRes] = await Promise.all([
-          attendanceApi.today(new Date(selectedDate).toISOString()),
-          staffApi.list(new Date(selectedDate).toISOString()),
+          attendanceApi.today(selectedDate.toISOString()),
+          staffApi.list(selectedDate.toISOString()),
         ]);
         if (staffRes) setStaff(staffRes);
         if (summaryRes) setSummary(summaryRes);
@@ -96,24 +102,22 @@ export function StaffPage({ onNavigate, onLogout }) {
     }
   };
 
-  // Invite Staff removed per requirements
-
-  const getStatusStyle = (status) => {
+  const getStatusBadgeVariant = (status) => {
     switch (status) {
-      case 'Present': return { backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', borderColor: 'var(--primary)' };
-      case 'Absent': return { backgroundColor: 'var(--destructive)', color: 'var(--destructive-foreground)', borderColor: 'var(--destructive)' };
-      case 'On Leave': return { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', borderColor: 'var(--accent)' };
-      default: return { backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' };
+      case 'Present': return 'default'; // Primary color
+      case 'Absent': return 'destructive';
+      case 'On Leave': return 'secondary'; // Or a custom 'warning' variant if available
+      default: return 'outline';
     }
   };
 
-  const getRoleStyle = (role) => {
+  const getRoleBadgeVariant = (role) => {
     switch (role) {
-      case 'Doctor': return { backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)', borderColor: 'var(--primary)' };
-      case 'Nurse': return { backgroundColor: 'var(--accent)', color: 'var(--accent-foreground)', borderColor: 'var(--accent)' };
-      case 'Technician': return { backgroundColor: 'var(--destructive)', color: 'var(--destructive-foreground)', borderColor: 'var(--destructive)' };
-      case 'Administrator': return { backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' };
-      default: return { backgroundColor: 'var(--muted)', color: 'var(--muted-foreground)', borderColor: 'var(--border)' };
+      case 'Doctor': return 'default';
+      case 'Nurse': return 'secondary';
+      case 'Technician': return 'outline';
+      case 'Administrator': return 'outline';
+      default: return 'outline';
     }
   };
 
@@ -126,142 +130,181 @@ export function StaffPage({ onNavigate, onLogout }) {
 
   return (
     <ToggleableSidebar currentPage="staff" onNavigate={onNavigate} onLogout={onLogout}>
-      <div className="p-6 space-y-6" style={{ color: 'var(--foreground)' }}>
+      <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h1 className="text-2xl font-bold" style={{ color: 'var(--foreground)' }}>Staff Management</h1>
-            <p style={{ color: 'var(--muted-foreground)', marginTop: '0.25rem' }}>
-              <span style={{ color: 'var(--primary)', fontWeight: '500' }}>{presentCount}</span> of {totalCount} staff members present today
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">Staff Management</h1>
+            <p className="text-muted-foreground mt-1">
+              <span className="text-primary font-medium">{presentCount}</span> of {totalCount} staff members present today
             </p>
             {(userHospital || userCity) && (
-              <div className="flex items-center mt-2 text-sm text-muted-foreground">
+              <div className="flex items-center mt-1 text-sm text-muted-foreground">
                 <Building2 className="w-4 h-4 mr-2" />
                 {[userHospital, userCity].filter(Boolean).join(" • ")}
               </div>
             )}
           </div>
 
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             {/* Date selector for attendance logging */}
             <div className="flex items-center gap-2">
-              <Label htmlFor="attendance-date" style={{ color: 'var(--foreground)' }}>Date</Label>
-              <Input id="attendance-date" type="date" value={selectedDate} max={new Date().toISOString().slice(0,10)} min={new Date().toISOString().slice(0,10)} onChange={(e) => setSelectedDate(e.target.value)} style={{ backgroundColor: 'var(--input)', color: 'var(--foreground)', borderColor: 'var(--border)' }} />
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-[240px] justify-start text-left font-normal",
+                      !selectedDate && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="end">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={(date) => date && setSelectedDate(date)}
+                    disabled={(date) => date > new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button style={{ backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }}>
-                  <UserPlus className="w-4 h-4 mr-2" /> Add Staff Member
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-md" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
-                <DialogHeader>
-                  <DialogTitle>Add New Staff Member</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  {['name', 'department'].map((field) => (
-                    <div key={field}>
-                      <Label htmlFor={field} style={{ color: 'var(--foreground)' }}>
-                        {field === 'name' ? 'Full Name' : 'Department'}
-                      </Label>
+
+            {isToday && (
+              <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button className="shadow-sm">
+                    <UserPlus className="w-4 h-4 mr-2" /> Add Staff Member
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Add New Staff Member</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Full Name</Label>
                       <Input
-                        id={field}
-                        value={formData[field]}
-                        onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                        placeholder={`Enter ${field}`}
-                        style={{ backgroundColor: 'var(--input)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="Enter full name"
                       />
                     </div>
-                  ))}
 
-                  <div>
-                    <Label htmlFor="role" style={{ color: 'var(--foreground)' }}>Role</Label>
-                    <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Doctor">Doctor</SelectItem>
-                        <SelectItem value="Nurse">Nurse</SelectItem>
-                        <SelectItem value="Technician">Technician</SelectItem>
-                        <SelectItem value="Administrator">Administrator</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="shift" style={{ color: 'var(--foreground)' }}>Shift</Label>
-                    <Select value={formData.shift} onValueChange={(value) => setFormData({ ...formData, shift: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select shift" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Morning">Morning (7AM - 3PM)</SelectItem>
-                        <SelectItem value="Evening">Evening (3PM - 11PM)</SelectItem>
-                        <SelectItem value="Night">Night (11PM - 7AM)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="attendance" style={{ color: 'var(--foreground)' }}>Attendance</Label>
-                    <Select value={formData.attendanceStatus} onValueChange={(value) => setFormData({ ...formData, attendanceStatus: value })}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Present or Absent" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Present">Present</SelectItem>
-                        <SelectItem value="Absent">Absent</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {formData.attendanceStatus === 'Present' && (
-                    <div>
-                      <Label htmlFor="attendanceTime" style={{ color: 'var(--foreground)' }}>Clock-in Time</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="department">Department</Label>
                       <Input
-                        id="attendanceTime"
-                        type="time"
-                        value={formData.attendanceTime}
-                        onChange={(e) => setFormData({ ...formData, attendanceTime: e.target.value })}
-                        style={{ backgroundColor: 'var(--input)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
+                        id="department"
+                        value={formData.department}
+                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                        placeholder="Enter department"
                       />
                     </div>
-                  )}
 
-                  <div className="flex space-x-2 pt-4">
-                    <Button onClick={handleAddStaff} style={{ flex: 1, backgroundColor: 'var(--primary)', color: 'var(--primary-foreground)' }} disabled={!formData.name || !formData.role || !formData.shift || !formData.department || !formData.attendanceStatus}>
-                      Add Staff Member
-                    </Button>
-                    <Button variant="outline" style={{ flex: 1, borderColor: 'var(--border)', color: 'var(--foreground)' }} onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="role">Role</Label>
+                        <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select role" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Doctor">Doctor</SelectItem>
+                            <SelectItem value="Nurse">Nurse</SelectItem>
+                            <SelectItem value="Technician">Technician</SelectItem>
+                            <SelectItem value="Administrator">Administrator</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="shift">Shift</Label>
+                        <Select value={formData.shift} onValueChange={(value) => setFormData({ ...formData, shift: value })}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select shift" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Morning">Morning (7AM - 3PM)</SelectItem>
+                            <SelectItem value="Evening">Evening (3PM - 11PM)</SelectItem>
+                            <SelectItem value="Night">Night (11PM - 7AM)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="attendance">Attendance Status</Label>
+                      <Select value={formData.attendanceStatus} onValueChange={(value) => setFormData({ ...formData, attendanceStatus: value })}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Present or Absent" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Present">Present</SelectItem>
+                          <SelectItem value="Absent">Absent</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {formData.attendanceStatus === 'Present' && (
+                      <div className="space-y-2">
+                        <Label htmlFor="attendanceTime">Clock-in Time</Label>
+                        <Input
+                          id="attendanceTime"
+                          type="time"
+                          value={formData.attendanceTime}
+                          onChange={(e) => setFormData({ ...formData, attendanceTime: e.target.value })}
+                        />
+                      </div>
+                    )}
+
+                    <div className="flex space-x-2 pt-2">
+                      <Button
+                        className="flex-1"
+                        onClick={handleAddStaff}
+                        disabled={!formData.name || !formData.role || !formData.shift || !formData.department || !formData.attendanceStatus}
+                      >
+                        Add Staff Member
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setIsAddDialogOpen(false)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
                   </div>
-                </div>
-              </DialogContent>
-            </Dialog>
-
-            {/* Invite Staff removed */}
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { icon: Users, label: 'Total Staff', value: totalCount, bg: 'var(--primary)', fg: 'var(--primary-foreground)' },
-            { icon: Clock, label: 'Present Today', value: presentCount, bg: 'var(--primary)', fg: 'var(--primary-foreground)' },
-            { icon: Stethoscope, label: 'Doctors', value: doctorsPresent, bg: 'var(--primary)', fg: 'var(--primary-foreground)' },
-            { icon: Heart, label: 'Nurses', value: nursesPresent, bg: 'var(--accent)', fg: 'var(--accent-foreground)' }
+            { icon: Users, label: 'Total Staff', value: totalCount, variant: 'default' },
+            { icon: Clock, label: 'Present Today', value: presentCount, variant: 'default' },
+            { icon: Stethoscope, label: 'Doctors', value: doctorsPresent, variant: 'secondary' },
+            { icon: Heart, label: 'Nurses', value: nursesPresent, variant: 'secondary' }
           ].map((card, idx) => {
             const Icon = card.icon;
             return (
-              <Card key={idx} className="p-4" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
-                <div className="flex items-center">
-                  <div className="p-2 rounded-lg" style={{ backgroundColor: card.bg }}>
-                    <Icon className="w-6 h-6" style={{ color: card.fg }} />
+              <Card key={idx} className="overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                <CardContent className="p-6 flex items-center">
+                  <div className={`p-3 rounded-xl mr-4 ${card.variant === 'default' ? 'bg-primary/10 text-primary' : 'bg-secondary text-secondary-foreground'
+                    }`}>
+                    <Icon className="w-6 h-6" />
                   </div>
-                  <div className="ml-3">
-                    <p style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>{card.label}</p>
-                    <p style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--foreground)' }}>{card.value}</p>
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{card.label}</p>
+                    <p className="text-2xl font-bold text-foreground">{card.value}</p>
                   </div>
-                </div>
+                </CardContent>
               </Card>
             );
           })}
@@ -269,51 +312,71 @@ export function StaffPage({ onNavigate, onLogout }) {
 
         {/* Additional Stats */}
         <div className="grid grid-cols-3 gap-4">
-          {[{ label: 'Present', value: presentCount, color: 'var(--primary)' }, { label: 'Absent', value: absentCount, color: 'var(--destructive)' }, { label: 'On Leave', value: onLeaveCount, color: 'var(--accent)' }].map((stat, idx) => (
-            <Card key={idx} className="p-4 text-center" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
-              <div style={{ fontSize: '1.5rem', fontWeight: '700', color: stat.color }}>{stat.value}</div>
-              <div style={{ fontSize: '0.875rem', color: 'var(--muted-foreground)' }}>{stat.label}</div>
+          {[
+            { label: 'Present', value: presentCount, color: 'text-primary' },
+            { label: 'Absent', value: absentCount, color: 'text-destructive' },
+            { label: 'On Leave', value: onLeaveCount, color: 'text-orange-500' }
+          ].map((stat, idx) => (
+            <Card key={idx} className="shadow-sm">
+              <CardContent className="p-4 text-center">
+                <div className={`text-2xl font-bold ${stat.color}`}>{stat.value}</div>
+                <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
+              </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Staff Table */}
-        <Card className="p-6" style={{ backgroundColor: 'var(--card)', color: 'var(--card-foreground)' }}>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                  {['Name', 'Role', 'Department', 'Shift', 'Status', 'Clock In'].map((th) => (
-                    <th key={th} className="text-left py-3 px-4" style={{ color: 'var(--foreground)', fontWeight: '500' }}>{th}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {staff.map((member) => (
-                  <tr key={member._id || member.id} style={{ borderBottom: '1px solid var(--border)' }}>
-                    <td className="py-3 px-4" style={{ color: 'var(--foreground)', fontWeight: 500 }}>{member.name}</td>
-                    <td className="py-3 px-4">
-                      <Badge style={getRoleStyle(member.role)}>{member.role}</Badge>
-                    </td>
-                    <td className="py-3 px-4" style={{ color: 'var(--muted-foreground)' }}>{member.department}</td>
-                    <td className="py-3 px-4" style={{ color: 'var(--muted-foreground)' }}>{member.shift}</td>
-                    <td className="py-3 px-4">
-                      <Badge style={getStatusStyle(member.status || 'Absent')}>{member.status || 'Absent'}</Badge>
-                    </td>
-                    <td className="py-3 px-4" style={{ color: 'var(--muted-foreground)', fontFamily: 'var(--font-mono)', fontSize: '0.875rem' }}>{formatClockTime(member.clockIn)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {staff.length === 0 && (
-            <div className="text-center py-8" style={{ color: 'var(--muted-foreground)' }}>
-              <Users className="w-12 h-12 mx-auto mb-4" style={{ color: 'var(--muted)' }} />
-              <p>No staff members found</p>
-              <p style={{ fontSize: '0.875rem' }}>Click "Add Staff Member" to get started</p>
-            </div>
-          )}
+        <Card className="shadow-sm">
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="pl-6">Name</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Shift</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="pr-6">Clock In</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {staff.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="h-32 text-center">
+                      <div className="flex flex-col items-center justify-center space-y-2 text-muted-foreground">
+                        <Users className="w-8 h-8 opacity-50" />
+                        <p>No staff members found</p>
+                        {isToday && <p className="text-xs">Click "Add Staff Member" to get started</p>}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  staff
+                    .map((member) => (
+                      <TableRow key={member._id || member.id}>
+                        <TableCell className="font-medium pl-6">{member.name}</TableCell>
+                        <TableCell>
+                          <Badge variant={getRoleBadgeVariant(member.role)} className="font-normal">
+                            {member.role}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{member.department}</TableCell>
+                        <TableCell className="text-muted-foreground">{member.shift}</TableCell>
+                        <TableCell>
+                          <Badge variant={getStatusBadgeVariant(member.status || 'Absent')}>
+                            {member.status || 'Absent'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-muted-foreground font-mono text-xs pr-6">
+                          {formatClockTime(member.clockIn)}
+                        </TableCell>
+                      </TableRow>
+                    ))
+                )}
+              </TableBody>
+            </Table>
+          </CardContent>
         </Card>
       </div>
     </ToggleableSidebar>

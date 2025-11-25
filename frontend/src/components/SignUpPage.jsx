@@ -1,11 +1,16 @@
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Mail, Lock, Building2, AlertCircle } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Mail, Lock, Building2, AlertCircle, Loader2, MapPin } from "lucide-react";
 import { authApi } from "@/lib/api";
 
-export function SignupPage({ onNavigate, onLogin }) {
+export function SignupPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -19,7 +24,7 @@ export function SignupPage({ onNavigate, onLogin }) {
 
   const hospitals = [
     "City General Hospital",
-    "Memorial Medical Center", 
+    "Memorial Medical Center",
     "St. Mary's Hospital",
     "Regional Health Center",
     "Community Medical Center",
@@ -27,7 +32,7 @@ export function SignupPage({ onNavigate, onLogin }) {
   ];
 
   const capitals = [
-    "New Delhi","Mumbai","Kolkata","Chennai","Bengaluru","Hyderabad","Jaipur","Lucknow","Bhopal","Patna","Ranchi","Bhubaneswar","Chandigarh","Dehradun","Shimla","Srinagar","Jammu","Gandhinagar","Raipur","Dispur","Imphal","Aizawl","Agartala","Itanagar","Kohima","Gangtok","Shillong","Panaji","Thiruvananthapuram"
+    "New Delhi", "Mumbai", "Kolkata", "Chennai", "Bengaluru", "Hyderabad", "Jaipur", "Lucknow", "Bhopal", "Patna", "Ranchi", "Bhubaneswar", "Chandigarh", "Dehradun", "Shimla", "Srinagar", "Jammu", "Gandhinagar", "Raipur", "Dispur", "Imphal", "Aizawl", "Agartala", "Itanagar", "Kohima", "Gangtok", "Shillong", "Panaji", "Thiruvananthapuram"
   ];
 
   const checkHospitalAdmin = async (selectedHospital) => {
@@ -35,7 +40,7 @@ export function SignupPage({ onNavigate, onLogin }) {
       setHospitalError("");
       return;
     }
-    
+
     try {
       const result = await authApi.checkHospitalAdmin(selectedHospital);
       if (result.hasAdmin) {
@@ -49,13 +54,13 @@ export function SignupPage({ onNavigate, onLogin }) {
     }
   };
 
-  const handleHospitalChange = (selectedHospital) => {
-    setHospital(selectedHospital);
+  const handleHospitalChange = (value) => {
+    setHospital(value);
     setHospitalError("");
-    
+
     // Check for admin after a short delay to avoid too many API calls
     setTimeout(() => {
-      checkHospitalAdmin(selectedHospital);
+      checkHospitalAdmin(value);
     }, 500);
   };
 
@@ -83,7 +88,8 @@ export function SignupPage({ onNavigate, onLogin }) {
       setLoading(true);
       await authApi.signup({ name: email.split('@')[0], email, password, role: 'admin', hospital, city });
       setSuccess("Account created. Please sign in.");
-      onNavigate("login");
+      // Small delay to show success message before navigating
+      setTimeout(() => router.push("/login"), 1500);
     } catch (err) {
       setError(err.message || "Signup failed");
     } finally {
@@ -92,152 +98,143 @@ export function SignupPage({ onNavigate, onLogin }) {
   };
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center p-6"
-      style={{ backgroundColor: "var(--background)", color: "var(--foreground)" }}
-    >
-      <div
-        className="p-8 rounded-2xl shadow-lg border w-full max-w-md"
-        style={{ backgroundColor: "var(--card)", borderColor: "var(--border)" }}
-      >
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold" style={{ color: "var(--foreground)" }}>
-            Create Account
-          </h1>
-          <p style={{ color: "var(--muted-foreground)", fontSize: "0.875rem", marginTop: "0.5rem" }}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-muted/30 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
+
+      <Card className="w-full max-w-lg shadow-xl border-border/50 bg-background/80 backdrop-blur-sm my-8">
+        <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-center mb-4">
+            <div className="bg-primary/10 p-3 rounded-xl">
+              <Building2 className="w-8 h-8 text-primary" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl font-bold tracking-tight">Create an account</CardTitle>
+          <CardDescription>
             Join Hospibot to manage your healthcare facility
-          </p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-5">
-          {error && (
-            <div className="text-sm" style={{ color: "var(--destructive)" }}>{error}</div>
-          )}
-          {success && (
-            <div className="text-sm" style={{ color: "var(--success)" }}>{success}</div>
-          )}
-          {[
-            { id: "email", type: "email", label: "Email", placeholder: "Enter your email", icon: Mail },
-            { id: "password", type: "password", label: "Password", placeholder: "Create a password", icon: Lock },
-            { id: "confirmPassword", type: "password", label: "Confirm Password", placeholder: "Confirm your password", icon: Lock },
-          ].map(({ id, type, label, placeholder, icon: Icon }) => (
-            <div key={id}>
-              <Label htmlFor={id} style={{ color: "var(--foreground)" }}>{label}</Label>
-              <div className="relative mt-1">
-                <Icon
-                  className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                  style={{ color: "var(--muted-foreground)" }}
-                />
-                <Input
-                  id={id}
-                  type={type}
-                  value={
-                    id === "email" ? email : id === "password" ? password : confirmPassword
-                  }
-                  onChange={(e) =>
-                    id === "email"
-                      ? setEmail(e.target.value)
-                      : id === "password"
-                        ? setPassword(e.target.value)
-                        : setConfirmPassword(e.target.value)
-                  }
-                  className="pl-10"
-                  placeholder={placeholder}
-                  required
-                  style={{
-                    backgroundColor: "var(--input)",
-                    color: "var(--foreground)",
-                    borderColor: "var(--border)",
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-
-          {/* Hospital Selection */}
-          <div>
-            <Label htmlFor="hospital" style={{ color: "var(--foreground)" }}>Hospital</Label>
-            <div className="relative mt-1">
-              <Building2
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                style={{ color: "var(--muted-foreground)" }}
-              />
-              <select
-                id="hospital"
-                value={hospital}
-                onChange={(e) => handleHospitalChange(e.target.value)}
-                className={`w-full pl-10 pr-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-ring ${
-                  hospitalError ? "border-red-500" : ""
-                }`}
-                required
-                style={{
-                  backgroundColor: "var(--input)",
-                  color: "var(--foreground)",
-                  borderColor: hospitalError ? "var(--destructive)" : "var(--border)",
-                }}
-              >
-                <option value="">Select your hospital</option>
-                {hospitals.map((hosp) => (
-                  <option key={hosp} value={hosp}>{hosp}</option>
-                ))}
-              </select>
-            </div>
-            {hospitalError && (
-              <div className="flex items-center mt-2 text-sm" style={{ color: "var(--destructive)" }}>
-                <AlertCircle className="w-4 h-4 mr-1" />
-                {hospitalError}
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-md bg-destructive/10 text-destructive text-sm font-medium flex items-center gap-2">
+                <AlertCircle className="w-4 h-4" />
+                {error}
               </div>
             )}
-          </div>
+            {success && (
+              <div className="p-3 rounded-md bg-green-500/10 text-green-600 text-sm font-medium flex items-center gap-2">
+                <span className="w-1 h-4 bg-green-500 rounded-full inline-block"></span>
+                {success}
+              </div>
+            )}
 
-          {/* City Selection (State Capitals) */}
-          <div>
-            <Label htmlFor="city" style={{ color: "var(--foreground)" }}>City (State Capital)</Label>
-            <div className="relative mt-1">
-              <Building2
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                style={{ color: "var(--muted-foreground)" }}
-              />
-              <select
-                id="city"
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 rounded-md border focus:outline-none focus:ring-2 focus:ring-ring"
-                required
-                style={{
-                  backgroundColor: "var(--input)",
-                  color: "var(--foreground)",
-                  borderColor: "var(--border)",
-                }}
-              >
-                <option value="">Select city</option>
-                {capitals.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@hospital.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-9"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className="w-full"
-            style={{ backgroundColor: "var(--primary)", color: "var(--primary-foreground)" }}
-            disabled={loading || !!hospitalError}
-          >
-            {loading ? "Creating account..." : "Sign up"}
-          </Button>
-        </form>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-9"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="pl-9"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
 
-        <div className="mt-6 text-center text-sm" style={{ color: "var(--muted-foreground)" }}>
+            <div className="space-y-2">
+              <Label htmlFor="hospital">Hospital</Label>
+              <Select onValueChange={handleHospitalChange} value={hospital}>
+                <SelectTrigger className={hospitalError ? "border-destructive" : ""}>
+                  <SelectValue placeholder="Select your hospital" />
+                </SelectTrigger>
+                <SelectContent>
+                  {hospitals.map((hosp) => (
+                    <SelectItem key={hosp} value={hosp}>{hosp}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {hospitalError && (
+                <div className="flex items-center text-xs text-destructive font-medium">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  {hospitalError}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="city">City (State Capital)</Label>
+              <Select onValueChange={setCity} value={city}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select city" />
+                </SelectTrigger>
+                <SelectContent>
+                  {capitals.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <Button className="w-full mt-2" type="submit" disabled={loading || !!hospitalError}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : (
+                'Sign up'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+        <CardFooter className="flex justify-center text-sm text-muted-foreground">
           Already have an account?{" "}
-          <button
-            onClick={() => onNavigate("login")}
-            style={{ color: "var(--primary)", fontWeight: 500, textDecoration: "underline" }}
+          <Button
+            variant="link"
+            className="p-0 h-auto font-medium ml-1"
+            asChild
           >
-            Sign in
-          </button>
-        </div>
-      </div>
+            <Link href="/login">Sign in</Link>
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

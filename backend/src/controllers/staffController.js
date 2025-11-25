@@ -22,6 +22,7 @@ exports.listByHospital = async (req, res) => {
         ...sObj,
         status: att?.status || "Absent",
         clockIn: att?.clockIn || null,
+        attendanceId: att?._id || null,
       };
     });
 

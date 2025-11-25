@@ -120,6 +120,9 @@ export const attendanceApi = {
   setStatus(payload) {
     return request("/api/attendance/set-status", { method: "POST", body: JSON.stringify(payload) });
   },
+  remove(id) {
+    return request(`/api/attendance/${id}`, { method: "DELETE" });
+  },
 };
 
 export function saveAuth(token, user) {

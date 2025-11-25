@@ -79,11 +79,7 @@ exports.setTodayStatus = async (req, res) => {
     if (!staff) return res.status(404).json({ error: "Staff not found" });
 
     const targetDate = date ? new Date(date) : new Date();
-    // Only allow setting attendance for today
-    const today = new Date();
-    if (targetDate < startOfDay(today) || targetDate > endOfDay(today)) {
-      return res.status(400).json({ error: "Attendance can only be logged for today" });
-    }
+    // Allow setting attendance for any date (past or present)
     const effectiveTime = time ? new Date(time) : targetDate;
 
     const update = { status };
@@ -101,6 +97,18 @@ exports.setTodayStatus = async (req, res) => {
     res.json(record);
   } catch (err) {
     res.status(400).json({ error: err.message || "Failed to set attendance" });
+  }
+};
+
+exports.deleteAttendance = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const hospital = req.user.hospital;
+    const record = await Attendance.findOneAndDelete({ _id: id, hospital });
+    if (!record) return res.status(404).json({ error: "Attendance record not found" });
+    res.json({ message: "Attendance record deleted" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to delete attendance record" });
   }
 };
 
