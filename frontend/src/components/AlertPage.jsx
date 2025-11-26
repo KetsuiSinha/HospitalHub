@@ -1,98 +1,66 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Clock, CheckCircle, X, Calendar, MapPin, Users, TrendingUp, Zap, Info } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle, X, Calendar, MapPin, Users, TrendingUp, Zap, Info, Loader2 } from 'lucide-react';
 
 export function AlertPage() {
-  const [alerts, setAlerts] = useState([
-    {
-      id: 1,
-      message: 'Oxygen supply low in ICU',
-      priority: 'high',
-      timestamp: '2 minutes ago',
-      location: 'ICU Ward',
-      status: 'active',
-      dateTime: '2024-09-10 14:35:22',
-      predictions: 'Critical supply depletion expected within 4 hours. Immediate restocking required.',
-      affectedPatients: 12,
-      estimatedImpact: 'High - Patient safety at risk',
-      recommendedAction: 'Contact supplier immediately, deploy backup oxygen tanks',
-      description: 'Critical oxygen shortage detected in ICU Ward. Current levels at 15% capacity with complete depletion expected within 4 hours if no action is taken. Caused by increased patient demand and delayed supplier delivery.'
-    },
-    {
-      id: 2,
-      message: 'ORS shortage in Ward 3',
-      priority: 'medium',
-      timestamp: '15 minutes ago',
-      location: 'Ward 3',
-      status: 'active',
-      dateTime: '2024-09-10 14:22:15',
-      predictions: 'Stock depletion in 24 hours based on current usage patterns.',
-      affectedPatients: 8,
-      estimatedImpact: 'Medium - Treatment delays possible',
-      recommendedAction: 'Schedule emergency procurement within 12 hours',
-      description: 'ORS supplies critically low with only 12% of standard stock remaining. Shortage caused by 40% surge in gastrointestinal cases this week, exceeding normal consumption patterns.'
-    },
-    {
-      id: 3,
-      message: 'Paracetamol near expiry',
-      priority: 'low',
-      timestamp: '1 hour ago',
-      location: 'Pharmacy',
-      status: 'active',
-      dateTime: '2024-09-10 13:37:08',
-      predictions: 'Medication expires in 7 days. Usage rate suggests 40% wastage.',
-      affectedPatients: 0,
-      estimatedImpact: 'Low - No immediate patient impact',
-      recommendedAction: 'Redistribute to high-usage wards or return to supplier',
-      description: '2,400 Paracetamol tablets ($180 value) approaching expiration in 7 days. Current usage patterns indicate 40% will go to waste if not redistributed promptly.'
-    },
-    {
-      id: 4,
-      message: 'Blood pressure monitor calibration due',
-      priority: 'medium',
-      timestamp: '2 hours ago',
-      location: 'Emergency',
-      status: 'active',
-      dateTime: '2024-09-10 12:37:45',
-      predictions: 'Device accuracy may degrade, affecting diagnosis reliability.',
-      affectedPatients: 15,
-      estimatedImpact: 'Medium - Potential diagnostic errors',
-      recommendedAction: 'Schedule calibration within 24 hours, use backup device',
-      description: 'Primary BP monitor in Emergency exceeded 90-day calibration interval. Device serves 15+ patients daily. Delayed calibration may cause 5mmHg reading errors affecting emergency decisions.'
-    },
-    {
-      id: 5,
-      message: 'Insulin shortage resolved',
-      priority: 'high',
-      timestamp: '3 hours ago',
-      location: 'Diabetes Ward',
-      status: 'resolved',
-      dateTime: '2024-09-10 11:45:12',
-      predictions: 'Supply restored to normal levels. No further shortages expected.',
-      affectedPatients: 25,
-      estimatedImpact: 'Resolved - Normal operations resumed',
-      recommendedAction: 'Continue monitoring stock levels',
-      description: 'Critical insulin shortage affecting 25 diabetic patients successfully resolved through emergency procurement from partner facility. Cold-chain transportation issue caused initial delay.'
-    },
-    {
-      id: 6,
-      message: 'Staff shortage night shift',
-      priority: 'high',
-      timestamp: '4 hours ago',
-      location: 'General Ward',
-      status: 'active',
-      dateTime: '2024-09-10 10:52:33',
-      predictions: 'Nurse-to-patient ratio below safe standards. Overtime costs increasing.',
-      affectedPatients: 30,
-      estimatedImpact: 'High - Patient care quality compromised',
-      recommendedAction: 'Deploy on-call staff, consider temporary agency nurses',
-      description: 'Severe nursing shortage with only 4 nurses for 30 patients (below 1:6 safe ratio). Two nurses sick, one on emergency leave. Increased risk of medication errors and delayed response times.'
-    }
-  ]);
-
+  const [alerts, setAlerts] = useState([]);
   const [filter, setFilter] = useState('active');
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Fetch alerts on mount
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch('http://localhost:5000/api/alerts', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setAlerts(data);
+        }
+      } catch (error) {
+        console.error('Error fetching alerts:', error);
+      }
+    };
+
+    fetchAlerts();
+  }, []);
+
+  const handleGenerateAlert = async () => {
+    setIsGenerating(true);
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch('http://localhost:5000/api/alerts/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Backend error:', response.status, errorText);
+        throw new Error(`Failed to generate alerts: ${response.status} ${errorText}`);
+      }
+
+      const newAlerts = await response.json();
+
+      // Backend now returns the saved alert objects, so we can just prepend them
+      const formattedAlerts = Array.isArray(newAlerts) ? newAlerts : [newAlerts];
+
+      setAlerts(prev => [...formattedAlerts, ...prev]);
+    } catch (error) {
+      console.error('Error generating alerts:', error);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const getPriorityIcon = (priority) => {
     switch (priority) {
@@ -106,18 +74,45 @@ export function AlertPage() {
   const getPriorityBadgeVariant = (priority) => {
     switch (priority) {
       case 'high': return 'destructive';
-      case 'medium': return 'secondary'; // Using secondary for medium as warning isn't standard
+      case 'medium': return 'secondary';
       case 'low': return 'outline';
       default: return 'outline';
     }
   };
 
+  const updateAlertStatus = async (id, newStatus) => {
+    // Optimistic update
+    setAlerts(prevAlerts =>
+      prevAlerts.map(alert =>
+        (alert._id === id || alert.id === id) ? { ...alert, status: newStatus } : alert
+      )
+    );
+
+    try {
+      const token = localStorage.getItem('auth_token');
+      const response = await fetch(`http://localhost:5000/api/alerts/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update status');
+      }
+    } catch (error) {
+      console.error('Error updating alert status:', error);
+    }
+  };
+
   const handleResolveAlert = (id) => {
-    setAlerts(alerts.map(alert => alert.id === id ? { ...alert, status: 'resolved' } : alert));
+    updateAlertStatus(id, 'resolved');
   };
 
   const handleDismissAlert = (id) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
+    updateAlertStatus(id, 'dismissed');
   };
 
   const filteredAlerts = alerts.filter(alert => filter === 'all' ? true : alert.status === filter);
@@ -134,6 +129,24 @@ export function AlertPage() {
             {activeAlertsCount} active alerts • {highPriorityCount} high priority
           </p>
         </div>
+
+        <Button
+          onClick={handleGenerateAlert}
+          disabled={isGenerating}
+          className="bg-primary text-primary-foreground shadow hover:bg-primary/90"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            <>
+              <Zap className="mr-2 h-4 w-4" />
+              Generate Alert
+            </>
+          )}
+        </Button>
 
         <div className="flex space-x-2 bg-muted p-1 rounded-lg">
           {['all', 'active', 'resolved'].map(f => (
@@ -153,7 +166,7 @@ export function AlertPage() {
       {/* Alert Cards */}
       <div className="grid gap-6">
         {filteredAlerts.map(alert => (
-          <Card key={alert.id} className="transition-all hover:shadow-md border-border/60">
+          <Card key={alert._id || alert.id} className="transition-all hover:shadow-md border-border/60">
             <CardContent className="p-6">
               {/* Card Header */}
               <div className="flex items-start justify-between mb-6">
@@ -197,7 +210,7 @@ export function AlertPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleResolveAlert(alert.id)}
+                      onClick={() => handleResolveAlert(alert._id || alert.id)}
                       className="text-green-600 hover:text-green-700 hover:bg-green-50 dark:hover:bg-green-900/20"
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
@@ -206,7 +219,7 @@ export function AlertPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleDismissAlert(alert.id)}
+                      onClick={() => handleDismissAlert(alert._id || alert.id)}
                       className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                     >
                       <X className="w-4 h-4 mr-2" />
@@ -251,7 +264,7 @@ export function AlertPage() {
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground font-mono">
-                  ID: #{alert.id.toString().padStart(4, '0')}
+                  ID: #{alert._id ? alert._id.toString().substring(alert._id.toString().length - 4) : (alert.id || '').toString().padStart(4, '0')}
                 </span>
               </div>
             </CardContent>

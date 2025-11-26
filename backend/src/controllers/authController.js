@@ -6,10 +6,10 @@ const jwt = require("jsonwebtoken");
 exports.checkHospitalAdmin = async (req, res) => {
   try {
     const { hospital } = req.params;
-    
+
     const existingAdmin = await User.findOne({ hospital, role: "admin" });
-    
-    res.json({ 
+
+    res.json({
       hasAdmin: !!existingAdmin,
       adminEmail: existingAdmin ? existingAdmin.email : null
     });
@@ -32,12 +32,12 @@ exports.inviteStaff = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // Create staff member for the same hospital as the admin
-    const user = new User({ 
-      name, 
-      email, 
-      password: hashedPassword, 
-      role: "staff", 
-      hospital 
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: "staff",
+      hospital
     });
     await user.save();
 
@@ -59,8 +59,8 @@ exports.signup = async (req, res) => {
     // Check if this hospital already has an admin
     const existingHospitalAdmin = await User.findOne({ hospital, role: "admin" });
     if (existingHospitalAdmin) {
-      return res.status(400).json({ 
-        error: `An admin already exists for ${hospital}. Please contact the existing admin or choose a different hospital.` 
+      return res.status(400).json({
+        error: `An admin already exists for ${hospital}. Please contact the existing admin or choose a different hospital.`
       });
     }
 
