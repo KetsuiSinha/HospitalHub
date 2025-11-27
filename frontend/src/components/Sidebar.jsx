@@ -59,12 +59,41 @@ export function AppSidebar({ children }) {
   );
 }
 
+
 function AppSidebarContent() {
   const pathname = usePathname();
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     setUser(getAuthUser());
+  }, []);
+
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        if (!token) return;
+
+        const response = await fetch('http://localhost:5000/api/alerts', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          const active = data.filter(a => a.status === 'active').length;
+          setAlertCount(active);
+        }
+      } catch (error) {
+        console.error('Error fetching alerts count:', error);
+      }
+    };
+
+    fetchAlerts();
+    const interval = setInterval(fetchAlerts, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleLogout = () => {
@@ -120,6 +149,11 @@ function AppSidebarContent() {
                   <Link href="/alerts">
                     <AlertTriangle />
                     <span>Alerts</span>
+                    {alertCount > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center flex items-center justify-center">
+                        {alertCount}
+                      </span>
+                    )}
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

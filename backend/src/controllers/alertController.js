@@ -36,9 +36,9 @@ const generateAlerts = async (req, res) => {
         dateTime: new Date().toLocaleString(),
         predictions: data.predictions || 'See description for details.',
         affectedPatients: data.affectedPatients || 0,
-        estimatedImpact: data.estimatedImpact || 'Medium - Review required',
         recommendedAction: data.recommendedAction || 'Monitor situation',
-        description: data.description || data.alert || 'No additional details provided.'
+        description: data.description || data.alert || 'No additional details provided.',
+        hospital: req.user.hospital
       });
 
       const savedAlert = await newAlert.save();
@@ -58,7 +58,8 @@ const generateAlerts = async (req, res) => {
 
 const getAlerts = async (req, res) => {
   try {
-    const alerts = await Alert.find().sort({ createdAt: -1 });
+    const { hospital } = req.user;
+    const alerts = await Alert.find({ hospital }).sort({ createdAt: -1 });
     res.status(200).json(alerts);
   } catch (error) {
     console.error('Error fetching alerts:', error.message);

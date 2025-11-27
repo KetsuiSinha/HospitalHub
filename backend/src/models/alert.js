@@ -12,6 +12,7 @@ const alertSchema = new mongoose.Schema({
     estimatedImpact: { type: String },
     recommendedAction: { type: String },
     description: { type: String },
+    hospital: { type: String, required: true },
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
