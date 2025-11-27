@@ -1,16 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { Building2, AlertTriangle, CheckCircle2, TrendingUp, Users } from 'lucide-react';
+import { AlertTriangle, TrendingUp, Users, Calendar as CalendarIcon } from 'lucide-react';
 import { getAuthUser, attendanceApi, medicinesApi } from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function Dashboard() {
   const [userHospital, setUserHospital] = useState("");
   const [userCity, setUserCity] = useState("");
   const [staffStats, setStaffStats] = useState({ present: 0, total: 0, absent: 0, onLeave: 0 });
   const [inventoryItems, setInventoryItems] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().slice(0, 10));
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     const user = getAuthUser();
@@ -21,17 +30,19 @@ export function Dashboard() {
     // Load attendance summary
     const load = async () => {
       try {
-        const sum = await attendanceApi.today(new Date(selectedDate).toISOString());
+        const sum = await attendanceApi.today(selectedDate.toISOString());
         const present = sum.present || 0;
         const onLeave = sum.onLeave || 0;
         const total = sum.total || 0;
         // Treat unmarked as absent for the dashboard summary
-        const absent = total - present - onLeave;
+        // Absent = Total Staff - Present - On Leave
+        // This ensures 'Absent' count includes both explicitly marked absent and those who haven't marked attendance
+        const absent = Math.max(0, total - present - onLeave);
 
         setStaffStats({
           present,
           total,
-          absent: absent < 0 ? 0 : absent,
+          absent,
           onLeave,
         });
       } catch { }
@@ -51,17 +62,37 @@ export function Dashboard() {
   }, [selectedDate]);
 
 
-  const alerts = [
-    { text: 'Oxygen supply low in ICU', priority: 'high' },
-    { text: 'ORS shortage in Ward 3', priority: 'medium' },
-    { text: 'Paracetamol near expiry', priority: 'low' },
-  ];
+  const [alerts, setAlerts] = useState([]);
 
-  const recommendations = [
-    'Order 200 ORS sachets',
-    'Increase stock: Amoxicillin 250mg',
-    'Reorder: Vitamin D3 60k IU',
-  ];
+  useEffect(() => {
+    const fetchAlerts = async () => {
+      try {
+        const token = localStorage.getItem('auth_token');
+        const response = await fetch('http://localhost:5000/api/alerts', {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        if (response.ok) {
+          const data = await response.json();
+          // Filter for active alerts and map to dashboard format
+          const activeAlerts = data
+            .filter(alert => alert.status === 'active')
+            .map(alert => ({
+              text: alert.message,
+              priority: alert.priority
+            }));
+          setAlerts(activeAlerts);
+        }
+      } catch (error) {
+        console.error('Error fetching alerts:', error);
+      }
+    };
+
+    fetchAlerts();
+  }, []);
+
+
 
   const getAlertBadgeVariant = (priority) => {
     switch (priority) {
@@ -133,7 +164,8 @@ export function Dashboard() {
       </div>
 
       {/* Bottom Row */}
-      <div className="grid lg:grid-cols-2 gap-6">
+      {/* Bottom Row */}
+      <div className="grid lg:grid-cols-1 gap-6">
         {/* Staff Attendance */}
         <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -141,13 +173,30 @@ export function Dashboard() {
               <Users className="w-5 h-5 text-primary" />
               Staff Attendance
             </CardTitle>
-            <input
-              type="date"
-              value={selectedDate}
-              max={new Date().toISOString().slice(0, 10)}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="px-3 py-1 rounded-md border border-input bg-background text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant={"outline"}
+                  className={cn(
+                    "w-[240px] justify-start text-left font-normal",
+                    !selectedDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {selectedDate ? format(selectedDate, "PPP") : <span>Pick a date</span>}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={setSelectedDate}
+                  disabled={(date) => date > new Date()}
+                  required
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-center py-8">
@@ -228,29 +277,8 @@ export function Dashboard() {
           </CardContent>
         </Card>
 
-        {/* AI Recommendations */}
-        <Card className="shadow-sm hover:shadow-md transition-shadow bg-gradient-to-br from-card to-primary/5 border-primary/10">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Building2 className="w-5 h-5 text-primary" />
-              AI Recommendations
-            </CardTitle>
-            <CardDescription>Smart suggestions to optimize operations</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {recommendations.map((rec, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 rounded-lg bg-background/60 backdrop-blur-sm border border-border/50">
-                <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-                <span className="text-sm font-medium leading-relaxed">{rec}</span>
-              </div>
-            ))}
-            <div className="pt-4">
-              <button className="text-xs text-primary hover:underline font-medium">
-                View all recommendations →
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+
+
       </div>
     </div>
   );

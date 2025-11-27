@@ -2,11 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Clock, CheckCircle, X, Calendar, MapPin, Users, TrendingUp, Zap, Info, Loader2 } from 'lucide-react';
+import { AlertTriangle, Clock, CheckCircle, X, Calendar, MapPin, Users, TrendingUp, Zap, Info, Loader2, Calendar as CalendarIcon } from 'lucide-react';
+import { format } from "date-fns";
+import { cn } from "@/lib/utils";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export function AlertPage() {
   const [alerts, setAlerts] = useState([]);
   const [filter, setFilter] = useState('active');
+  const [date, setDate] = useState();
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Fetch alerts on mount
@@ -115,7 +124,23 @@ export function AlertPage() {
     updateAlertStatus(id, 'dismissed');
   };
 
-  const filteredAlerts = alerts.filter(alert => filter === 'all' ? true : alert.status === filter);
+  const filteredAlerts = alerts.filter(alert => {
+    const matchesStatus = filter === 'all' ? true : alert.status === filter;
+
+    if (!date) return matchesStatus;
+
+    // Filter by date if selected
+    // Use createdAt if available, otherwise fallback to parsing timestamp/dateTime if possible
+    // Assuming createdAt is an ISO string or Date object from backend
+    const alertDate = new Date(alert.createdAt || alert.dateTime);
+    const isSameDay =
+      alertDate.getDate() === date.getDate() &&
+      alertDate.getMonth() === date.getMonth() &&
+      alertDate.getFullYear() === date.getFullYear();
+
+    return matchesStatus && isSameDay;
+  });
+
   const activeAlertsCount = alerts.filter(alert => alert.status === 'active').length;
   const highPriorityCount = alerts.filter(alert => alert.priority === 'high' && alert.status === 'active').length;
 
@@ -130,36 +155,65 @@ export function AlertPage() {
           </p>
         </div>
 
-        <Button
-          onClick={handleGenerateAlert}
-          disabled={isGenerating}
-          className="bg-primary text-primary-foreground shadow hover:bg-primary/90"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            <>
-              <Zap className="mr-2 h-4 w-4" />
-              Generate Alert
-            </>
-          )}
-        </Button>
+        {/* Only show Generate Alert button if no date is selected OR if selected date is today */}
+        {(!date || (date && date.toDateString() === new Date().toDateString())) && (
+          <Button
+            onClick={handleGenerateAlert}
+            disabled={isGenerating}
+            className="bg-primary text-primary-foreground shadow hover:bg-primary/90"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Zap className="mr-2 h-4 w-4" />
+                Generate Alert
+              </>
+            )}
+          </Button>
+        )}
 
-        <div className="flex space-x-2 bg-muted p-1 rounded-lg">
-          {['all', 'active', 'resolved'].map(f => (
-            <Button
-              key={f}
-              variant={filter === f ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setFilter(f)}
-              className="capitalize"
-            >
-              {f}
-            </Button>
-          ))}
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant={"outline"}
+                className={cn(
+                  "w-[240px] justify-start text-left font-normal",
+                  !date && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {date ? format(date, "PPP") : <span>Pick a date</span>}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                mode="single"
+                selected={date}
+                onSelect={setDate}
+                disabled={(date) => date > new Date()}
+                initialFocus
+              />
+            </PopoverContent>
+          </Popover>
+
+          <div className="flex space-x-2 bg-muted p-1 rounded-lg">
+            {['all', 'active', 'resolved'].map(f => (
+              <Button
+                key={f}
+                variant={filter === f ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setFilter(f)}
+                className="capitalize"
+              >
+                {f}
+              </Button>
+            ))}
+          </div>
         </div>
       </div>
 
