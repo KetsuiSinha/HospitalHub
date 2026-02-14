@@ -282,9 +282,6 @@ export function LandingPage() {
             </div>
 
             {/* Social Proof / Trust */}
-            <div className="mt-12 w-full max-w-5xl">
-              <InfiniteCarousel />
-            </div>
           </motion.div>
         </div>
       </section>
