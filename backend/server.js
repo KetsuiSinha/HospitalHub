@@ -26,6 +26,15 @@ app.use("/api/auth", require("./src/routes/authRoutes"));
 app.use("/api/medicines", authMiddleware, require("./src/routes/medicineRoutes"));
 app.use("/api/inventory", authMiddleware, require("./src/routes/inventoryRoutes"));
 app.use("/api/recommendations", authMiddleware, require("./src/routes/recommendationRoutes"));
+
+// AI recommendations (rate limited)
+const rateLimit = require("express-rate-limit");
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: parseInt(process.env.AI_RATE_LIMIT_MAX, 10) || 20,
+  message: { error: "Too many AI requests. Try again later." },
+});
+app.use("/api/ai", authMiddleware, aiLimiter, require("./src/routes/aiRoutes"));
 app.use("/api/staff", require("./src/routes/staffRoutes"));
 app.use("/api/attendance", require("./src/routes/attendanceRoutes"));
 app.use("/api/alerts", require("./src/routes/alertRoutes"));
